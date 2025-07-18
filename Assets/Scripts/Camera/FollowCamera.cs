@@ -2,15 +2,18 @@ using UnityEngine;
 
 public class FollowCamera : MonoBehaviour
 {
-    public Transform target;      // µû¶ó°¥ ´ë»ó (Â÷)
-    public Vector3 offset = new Vector3(0, 3, -3);  // Ä«¸Ş¶ó À§Ä¡ ¿ÀÇÁ¼Â
+    public Transform target; // Car
+    public Vector3 offset = new Vector3(0, 1, -6); // Car ë’¤ìª½, ìœ„ìª½
 
     void LateUpdate()
     {
         if (target != null)
         {
-            transform.position = target.position + offset;
-            transform.LookAt(target);  // Ç×»ó Â÷¸¦ ¹Ù¶óº¸°Ô
+            // 1ï¸âƒ£ targetì˜ íšŒì „ì„ ê³ ë ¤í•œ ì˜¤í”„ì…‹ ìœ„ì¹˜
+            transform.position = target.position + target.rotation * offset;
+
+            // 2ï¸âƒ£ í•­ìƒ target ë°”ë¼ë³´ê²Œ
+            transform.LookAt(target);
         }
     }
 }
