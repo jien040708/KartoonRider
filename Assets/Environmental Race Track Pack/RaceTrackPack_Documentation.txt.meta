@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ed21f19ad95060d448d718ed9dba07fc
+timeCreated: 1463991628
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 63493
+  packageName: Environmental Race Track Pack
+  packageVersion: 1.0
+  assetPath: Assets/Environmental Race Track Pack/RaceTrackPack_Documentation.txt
+  uploadId: 120060

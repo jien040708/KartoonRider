@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a15701eb7154ce44f89e87cf69e30f74
+timeCreated: 1463189326
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 63493
+  packageName: Environmental Race Track Pack
+  packageVersion: 1.0
+  assetPath: Assets/Environmental Race Track Pack/Prefabs/LampPost.prefab
+  uploadId: 120060
