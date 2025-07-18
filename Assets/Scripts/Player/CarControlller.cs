@@ -1,136 +1,128 @@
 using UnityEngine;
 
-public class CarController : MonoBehaviour
+public class RearWheelDrive : MonoBehaviour
 {
-    public float acceleration = 35f;      // 가속력 (상향)
-    public float deceleration = 15f;      // 감속력(브레이크, 상향)
-    public float maxSpeed = 55f;          // 최대 속도 (상향)
-    public float turnSpeed = 180f;        // 회전 속도 (상향)
-    public float driftTurnMultiplier = 1.7f; // 드리프트 시 회전 가중치 (약간 상향)
-    public float driftFriction = 0.5f;    // 드리프트 시 마찰력
+    [Header("Wheel Colliders")]
+    public WheelCollider frontLeftWheelCollider;
+    public WheelCollider frontRightWheelCollider;
+    public WheelCollider rearLeftWheelCollider;
+    public WheelCollider rearRightWheelCollider;
 
-    public float boostMultiplier = 2.2f;  // 부스트 시 속도 배수 (상향)
-    public float boostDuration = 0.7f;    // 부스트 지속 시간(초)
-    public float boostInputWindow = 0.3f; // 드리프트 끝나고 이 시간 내에 ↑ 누르면 부스트
+    [Header("Wheel Mesh Transforms")]
+    public Transform frontLeftWheelTransform;
+    public Transform frontRightWheelTransform;
+    public Transform rearLeftWheelTransform;
+    public Transform rearRightWheelTransform;
 
-    public Transform frontLeftWheel;  // 앞바퀴(FL)
-    public Transform frontRightWheel; // 앞바퀴(FR)
-    public Transform rearLeftWheel;   // 뒷바퀴(RL)
-    public Transform rearRightWheel;  // 뒷바퀴(RR)
-    public float wheelTurnAngle = 30f; // 최대 핸들 각도
-    public float wheelCircumference = 2.0f; // 바퀴 둘레(임의값, 필요시 조정)
-    public float turnPower = 200f; // 차체 회전력(조절 가능)
+    [Header("Driving")]
+    public float motorTorque = 500f;
+    public float maxSteerAngle = 60f;
+    public float brakeForce = 1000f;
 
-    private Rigidbody rb;
-    private float currentSpeed = 0f;
-    private bool isDrifting = false;
-    private bool wasDrifting = false;
-    private float driftEndTime = 0f;
-    private bool isBoosting = false;
-    private float boostTimer = 0f;
-    private float wheelRotation = 0f;
+    [Header("Drifting")]
+    public float driftSteerMultiplier = 1.5f;
+    public float normalStiffness = 2.0f;
+    public float driftStiffness = 1.0f;
+
+    private float inputVertical;
+    private float inputHorizontal;
+    private bool isDrifting;
 
     void Start()
     {
-        Debug.Log("🚗 CarController 시작됨!");
-        rb = GetComponent<Rigidbody>();
+        // 초기 마찰력 설정
+        ApplyStiffnessToAllWheels(normalStiffness);
+        ApplyStiffnessToAllWheels(normalStiffness);
+        GetComponent<Rigidbody>().centerOfMass = new Vector3(0, -0.5f, 0); // 중앙, 약간 아래로
+
+    }
+
+    void Update()
+    {
+        inputVertical = Input.GetAxis("Vertical");
+        inputHorizontal = Input.GetAxis("Horizontal");
+
+        // ✅ 방향 무관하게 드리프트 허용 (Shift + 좌우)
+        isDrifting = Input.GetKey(KeyCode.LeftShift) && Mathf.Abs(inputHorizontal) > 0.1f;
     }
 
     void FixedUpdate()
     {
-        float moveInput = Input.GetAxis("Vertical");
-        float turnInput = Input.GetAxis("Horizontal");
-        bool driftInput = Input.GetKey(KeyCode.LeftShift);
+        ApplyMotorTorque();
+        ApplySteering();
+        ApplyDriftFriction();
+        ApplyBrakes();
+        UpdateWheelVisuals();
+    }
 
-        // 가속/감속
-        if (moveInput > 0)
-            currentSpeed += moveInput * acceleration * Time.fixedDeltaTime;
-        else if (moveInput < 0)
-            currentSpeed += moveInput * deceleration * Time.fixedDeltaTime;
-        else
-            currentSpeed = Mathf.MoveTowards(currentSpeed, 0, deceleration * Time.fixedDeltaTime);
+    void ApplyBrakes()
+    {
+    // 키를 누르지 않을 때(가속 입력 거의 없음) 브레이크 적용
+    bool isBraking = Mathf.Abs(inputVertical) < 0.01f;
+    float brake = isBraking ? brakeForce : 0f;
 
-        // 회전/드리프트 시 감속
-        float handlingFriction = 1f;
-        if (Mathf.Abs(turnInput) > 0.1f)
-            handlingFriction += Mathf.Abs(turnInput) * 2f; // 핸들 꺾을수록 감속 증가
+    rearLeftWheelCollider.brakeTorque = brake;
+    rearRightWheelCollider.brakeTorque = brake;
+    frontLeftWheelCollider.brakeTorque = brake;
+    frontRightWheelCollider.brakeTorque = brake;
+    }
 
-        if (driftInput && Mathf.Abs(turnInput) > 0.2f && Mathf.Abs(currentSpeed) > maxSpeed * 0.5f)
-        {
-            isDrifting = true;
-            handlingFriction += 2f; // 드리프트 시 추가 감속
-        }
-        else if (!driftInput)
-        {
-            isDrifting = false;
-        }
+    void ApplyMotorTorque()
+    {
+        float torque = inputVertical * motorTorque;
+        rearLeftWheelCollider.motorTorque = torque;
+        rearRightWheelCollider.motorTorque = torque;
+    }
 
-        currentSpeed /= (1f + handlingFriction * Time.fixedDeltaTime);
+    void ApplySteering()
+    {
+        float steerAngle = inputHorizontal * maxSteerAngle;
+        if (isDrifting)
+            steerAngle *= driftSteerMultiplier;
 
-        // 드리프트 상태 추적 및 종료 시점 기록
-        if (isDrifting && !wasDrifting)
-        {
-            wasDrifting = true;
-        }
-        else if (!isDrifting && wasDrifting)
-        {
-            wasDrifting = false;
-            driftEndTime = Time.time;
-        }
+        frontLeftWheelCollider.steerAngle = steerAngle;
+        frontRightWheelCollider.steerAngle = steerAngle;
+    }
 
-        // 드리프트 종료 후 부스트 입력 체크
-        if (!isDrifting && (Time.time - driftEndTime) < boostInputWindow && moveInput > 0 && !isBoosting)
-        {
-            isBoosting = true;
-            boostTimer = boostDuration;
-        }
+    void ApplyDriftFriction()
+    {
+        float currentStiffness = isDrifting ? driftStiffness : normalStiffness;
+        ApplyStiffnessToAllWheels(currentStiffness);
+    }
 
-        // 부스트 효과 적용
-        float speedMultiplier = 1f;
-        if (isBoosting)
-        {
-            speedMultiplier = boostMultiplier;
-            boostTimer -= Time.fixedDeltaTime;
-            if (boostTimer <= 0f)
-            {
-                isBoosting = false;
-            }
-        }
+    void ApplyStiffnessToAllWheels(float stiffness)
+    {
+        SetWheelFriction(frontLeftWheelCollider, stiffness);
+        SetWheelFriction(frontRightWheelCollider, stiffness);
+        SetWheelFriction(rearLeftWheelCollider, stiffness);
+        SetWheelFriction(rearRightWheelCollider, stiffness);
+    }
 
-        // 최고속도 제한
-        currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed * speedMultiplier, maxSpeed * speedMultiplier);
+    void SetWheelFriction(WheelCollider collider, float stiffness)
+    {
+        var forwardFriction = collider.forwardFriction;
+        forwardFriction.stiffness = stiffness;
+        collider.forwardFriction = forwardFriction;
 
-        // 앞바퀴 조향
-        float steerAngle = turnInput * wheelTurnAngle;
-        // 바퀴 굴러가는 애니메이션
-        float distance = currentSpeed * Time.fixedDeltaTime;
-        float rotationAmount = (distance / wheelCircumference) * 360f;
-        wheelRotation += rotationAmount;
+        var sidewaysFriction = collider.sidewaysFriction;
+        sidewaysFriction.stiffness = stiffness;
+        collider.sidewaysFriction = sidewaysFriction;
+    }
 
-        // 앞바퀴: Y축(조향), X축(굴러감)
-        if (frontLeftWheel != null)
-            frontLeftWheel.localRotation = Quaternion.Euler(wheelRotation, steerAngle, 0);
-        if (frontRightWheel != null)
-            frontRightWheel.localRotation = Quaternion.Euler(wheelRotation, steerAngle, 0);
+    void UpdateWheelVisuals()
+    {
+        UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform);
+        UpdateSingleWheel(frontRightWheelCollider, frontRightWheelTransform);
+        UpdateSingleWheel(rearLeftWheelCollider, rearLeftWheelTransform);
+        UpdateSingleWheel(rearRightWheelCollider, rearRightWheelTransform);
+    }
 
-        // 뒷바퀴: X축(굴러감), Y축(항상 0)
-        if (rearLeftWheel != null)
-            rearLeftWheel.localRotation = Quaternion.Euler(wheelRotation, 0, 0);
-        if (rearRightWheel != null)
-            rearRightWheel.localRotation = Quaternion.Euler(wheelRotation, 0, 0);
-
-        // 앞바퀴 평균 방향 계산
-        Vector3 steerDir = transform.forward;
-        if (frontLeftWheel != null && frontRightWheel != null)
-            steerDir = (frontLeftWheel.forward + frontRightWheel.forward).normalized;
-
-        // 이동: steerDir 방향으로 힘을 준다
-        rb.AddForce(steerDir * currentSpeed, ForceMode.Acceleration);
-
-        // 차체 회전: 앞바퀴 조향 각도와 차체 forward의 각도 차이에 따라 토크 적용
-        float angleDiff = Vector3.SignedAngle(transform.forward, steerDir, Vector3.up);
-        //rb.AddTorque(Vector3.up * angleDiff * turnPower * Time.fixedDeltaTime, ForceMode.Force);
-        rb.AddForce(steerDir * currentSpeed, ForceMode.VelocityChange);
-        
+    void UpdateSingleWheel(WheelCollider collider, Transform visual)
+    {
+        Vector3 pos;
+        Quaternion rot;
+        collider.GetWorldPose(out pos, out rot);
+        visual.position = pos;
+        visual.rotation = rot;
     }
 }

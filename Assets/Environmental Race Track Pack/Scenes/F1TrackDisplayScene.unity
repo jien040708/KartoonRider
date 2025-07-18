@@ -158,7 +158,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 805095648}
   serializedVersion: 5
-  m_Mass: 720
+  m_Mass: 1500
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -189,30 +189,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5d4bac5cd9aa7f45b01580ac01bc85e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceleration: 35
-  deceleration: 15
-  maxSpeed: 55
-  turnSpeed: 180
-  driftTurnMultiplier: 1.7
-  driftFriction: 0.5
-  boostMultiplier: 2.2
-  boostDuration: 0.7
-  boostInputWindow: 0.3
-  frontLeftWheel: {fileID: 841592184}
-  frontRightWheel: {fileID: 2069614901}
-  rearLeftWheel: {fileID: 1121297244}
-  rearRightWheel: {fileID: 1988631086}
-  wheelTurnAngle: 30
-  wheelCircumference: 2
-  turnPower: 200
+  frontLeftWheelCollider: {fileID: 841592187}
+  frontRightWheelCollider: {fileID: 2069614904}
+  rearLeftWheelCollider: {fileID: 1121297247}
+  rearRightWheelCollider: {fileID: 1988631089}
+  frontLeftWheelTransform: {fileID: 2069614901}
+  frontRightWheelTransform: {fileID: 2069614901}
+  rearLeftWheelTransform: {fileID: 1121297244}
+  rearRightWheelTransform: {fileID: 1988631086}
+  motorTorque: 1500
+  maxSteerAngle: 30
+  brakeForce: 1000
+  driftSteerMultiplier: 1.7
+  normalStiffness: 1.5
+  driftStiffness: 0.4
 --- !u!1 &841592183 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4576468817563483559, guid: 0830086465bbffd4ab64ee6fc8c82d74, type: 3}
-  m_PrefabInstance: {fileID: 1507597672}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &841592184 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4656789524055844519, guid: 0830086465bbffd4ab64ee6fc8c82d74, type: 3}
   m_PrefabInstance: {fileID: 1507597672}
   m_PrefabAsset: {fileID: 0}
 --- !u!146 &841592187
@@ -224,7 +217,7 @@ WheelCollider:
   m_GameObject: {fileID: 841592183}
   serializedVersion: 2
   m_Center: {x: 0, y: 0, z: 0}
-  m_Radius: 0.3
+  m_Radius: 0.355
   m_SuspensionSpring:
     spring: 1000
     damper: 1000
@@ -273,7 +266,7 @@ WheelCollider:
   m_GameObject: {fileID: 1121297243}
   serializedVersion: 2
   m_Center: {x: 0, y: 0, z: 0}
-  m_Radius: 0.3
+  m_Radius: 0.355
   m_SuspensionSpring:
     spring: 1000
     damper: 1000
@@ -454,6 +447,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 400660, guid: 9234b507bb1d424449c1997fe6847ae0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 400660, guid: 9234b507bb1d424449c1997fe6847ae0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 400660, guid: 9234b507bb1d424449c1997fe6847ae0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400660, guid: 9234b507bb1d424449c1997fe6847ae0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
     - target: {fileID: 431926, guid: 9234b507bb1d424449c1997fe6847ae0, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -742,22 +751,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5d4bac5cd9aa7f45b01580ac01bc85e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceleration: 35
-  deceleration: 15
-  maxSpeed: 55
-  turnSpeed: 180
-  driftTurnMultiplier: 1.7
-  driftFriction: 0.5
-  boostMultiplier: 2.2
-  boostDuration: 0.7
-  boostInputWindow: 0.3
-  frontLeftWheel: {fileID: 0}
-  frontRightWheel: {fileID: 0}
-  rearLeftWheel: {fileID: 0}
-  rearRightWheel: {fileID: 0}
-  wheelTurnAngle: 30
-  wheelCircumference: 2
-  turnPower: 200
+  frontLeftWheelCollider: {fileID: 0}
+  frontRightWheelCollider: {fileID: 0}
+  rearLeftWheelCollider: {fileID: 0}
+  rearRightWheelCollider: {fileID: 0}
+  frontLeftWheelTransform: {fileID: 0}
+  frontRightWheelTransform: {fileID: 0}
+  rearLeftWheelTransform: {fileID: 0}
+  rearRightWheelTransform: {fileID: 0}
+  motorTorque: 1500
+  maxSteerAngle: 30
+  brakeForce: 1000
+  driftSteerMultiplier: 1.7
+  normalStiffness: 1.5
+  driftStiffness: 0.4
 --- !u!1 &1579971146 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 155630, guid: 9234b507bb1d424449c1997fe6847ae0, type: 3}
@@ -770,7 +777,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1579971146}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 1fdc2dc12ebc148cab275573d218fd5e, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -932,8 +939,8 @@ WheelCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1988631085}
   serializedVersion: 2
-  m_Center: {x: 0, y: 0, z: 0}
-  m_Radius: 0.3
+  m_Center: {x: -0.01, y: 0, z: 0}
+  m_Radius: 0.36
   m_SuspensionSpring:
     spring: 1000
     damper: 1000
@@ -981,8 +988,8 @@ WheelCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2069614900}
   serializedVersion: 2
-  m_Center: {x: 0, y: 0, z: 0}
-  m_Radius: 0.3
+  m_Center: {x: -0.01, y: 0, z: 0}
+  m_Radius: 0.36
   m_SuspensionSpring:
     spring: 1000
     damper: 1000
