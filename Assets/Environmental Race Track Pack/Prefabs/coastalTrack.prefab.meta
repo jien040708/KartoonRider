@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7d76ac986883f6e47b38d02e17432708
+timeCreated: 1463192350
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 63493
+  packageName: Environmental Race Track Pack
+  packageVersion: 1.0
+  assetPath: Assets/Environmental Race Track Pack/Prefabs/coastalTrack.prefab
+  uploadId: 120060
