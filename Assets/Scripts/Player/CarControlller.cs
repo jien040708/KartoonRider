@@ -13,6 +13,14 @@ public class CarController : MonoBehaviour
     public float boostDuration = 0.7f;    // 부스트 지속 시간(초)
     public float boostInputWindow = 0.3f; // 드리프트 끝나고 이 시간 내에 ↑ 누르면 부스트
 
+    public Transform frontLeftWheel;  // 앞바퀴(FL)
+    public Transform frontRightWheel; // 앞바퀴(FR)
+    public Transform rearLeftWheel;   // 뒷바퀴(RL)
+    public Transform rearRightWheel;  // 뒷바퀴(RR)
+    public float wheelTurnAngle = 30f; // 최대 핸들 각도
+    public float wheelCircumference = 2.0f; // 바퀴 둘레(임의값, 필요시 조정)
+    public float turnPower = 200f; // 차체 회전력(조절 가능)
+
     private Rigidbody rb;
     private float currentSpeed = 0f;
     private bool isDrifting = false;
@@ -20,6 +28,7 @@ public class CarController : MonoBehaviour
     private float driftEndTime = 0f;
     private bool isBoosting = false;
     private float boostTimer = 0f;
+    private float wheelRotation = 0f;
 
     void Start()
     {
@@ -91,21 +100,37 @@ public class CarController : MonoBehaviour
         // 최고속도 제한
         currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed * speedMultiplier, maxSpeed * speedMultiplier);
 
-        // 회전
-        float turn = turnInput * turnSpeed * Time.fixedDeltaTime;
-        if (isDrifting)
-        {
-            turn *= driftTurnMultiplier;
-            rb.linearDamping = driftFriction;
-        }
-        else
-        {
-            rb.linearDamping = 1f;
-        }
+        // 앞바퀴 조향
+        float steerAngle = turnInput * wheelTurnAngle;
+        // 바퀴 굴러가는 애니메이션
+        float distance = currentSpeed * Time.fixedDeltaTime;
+        float rotationAmount = (distance / wheelCircumference) * 360f;
+        wheelRotation += rotationAmount;
 
-        // 실제 이동 및 회전
-        Vector3 movement = transform.forward * currentSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(rb.position + movement);
-        rb.MoveRotation(rb.rotation * Quaternion.Euler(0, turn, 0));
+        // 앞바퀴: Y축(조향), X축(굴러감)
+        if (frontLeftWheel != null)
+            frontLeftWheel.localRotation = Quaternion.Euler(wheelRotation, steerAngle, 0);
+        if (frontRightWheel != null)
+            frontRightWheel.localRotation = Quaternion.Euler(wheelRotation, steerAngle, 0);
+
+        // 뒷바퀴: X축(굴러감), Y축(항상 0)
+        if (rearLeftWheel != null)
+            rearLeftWheel.localRotation = Quaternion.Euler(wheelRotation, 0, 0);
+        if (rearRightWheel != null)
+            rearRightWheel.localRotation = Quaternion.Euler(wheelRotation, 0, 0);
+
+        // 앞바퀴 평균 방향 계산
+        Vector3 steerDir = transform.forward;
+        if (frontLeftWheel != null && frontRightWheel != null)
+            steerDir = (frontLeftWheel.forward + frontRightWheel.forward).normalized;
+
+        // 이동: steerDir 방향으로 힘을 준다
+        rb.AddForce(steerDir * currentSpeed, ForceMode.Acceleration);
+
+        // 차체 회전: 앞바퀴 조향 각도와 차체 forward의 각도 차이에 따라 토크 적용
+        float angleDiff = Vector3.SignedAngle(transform.forward, steerDir, Vector3.up);
+        //rb.AddTorque(Vector3.up * angleDiff * turnPower * Time.fixedDeltaTime, ForceMode.Force);
+        rb.AddForce(steerDir * currentSpeed, ForceMode.VelocityChange);
+        
     }
 }
