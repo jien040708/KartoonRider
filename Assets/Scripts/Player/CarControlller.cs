@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class CarController : MonoBehaviour
 {
     public float moveSpeed = 10f;
@@ -7,6 +9,7 @@ public class CarController : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("🚗 CarController 시작됨!");
         rb = GetComponent<Rigidbody>();
     }
 
@@ -14,6 +17,8 @@ public class CarController : MonoBehaviour
     {
         float move = Input.GetAxis("Vertical") * moveSpeed;
         float turn = Input.GetAxis("Horizontal") * turnSpeed;
+
+            Debug.Log("Move: " + move + ", Turn: " + turn); 
 
         Vector3 movement = transform.forward * move * Time.fixedDeltaTime;
         Quaternion rotation = Quaternion.Euler(0, turn * Time.fixedDeltaTime, 0);
