@@ -23,6 +23,7 @@ public class CarController : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("🚗 CarController 시작됨!");
         rb = GetComponent<Rigidbody>();
     }
 
