@@ -11,5 +11,14 @@ UserSettings/
 *.unityproj
 *.sln
 *.user
-*.pidb
 *.booproj
+*.pyc
+venv/
+.env/
+.venv/
+.pytest_cache/
+.DS_store
+.mypy_cache/
+.coverage/
+htmlcov/
+*.log
