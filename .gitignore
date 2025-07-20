@@ -32,9 +32,6 @@ Thumbs.db
 *.bak
 *.tmp
 
-# Asset meta files (keep these!)
-*.meta
-
 # Uncomment if you use Rider
  .idea/
  *.sln.iml

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fe393ace9b354375a9cb14cdbbc28be4
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 150956
+  packageName: Karting Microgame | URP
+  packageVersion: 4.1.0
+  assetPath: Assets/TextMesh Pro/Resources/Shaders/TMP_SDF-Mobile.shader
+  uploadId: 613807

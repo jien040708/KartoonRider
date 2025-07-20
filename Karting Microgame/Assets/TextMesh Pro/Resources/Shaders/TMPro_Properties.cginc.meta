@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3997e2241185407d80309a82f9148466
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 150956
+  packageName: Karting Microgame | URP
+  packageVersion: 4.1.0
+  assetPath: Assets/TextMesh Pro/Resources/Shaders/TMPro_Properties.cginc
+  uploadId: 613807
