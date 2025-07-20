@@ -14,7 +14,7 @@ class User(SQLModel, table=True):
     password: str  # 해시된 비밀번호
     created_at: datetime = Field(default_factory=datetime.utcnow)
     rating: int = Field(default=1000)
-    coin: int = Field(default=1000)
+    coin: int = Field(default=100)
     hosted_rooms: List["Room"] = Relationship(back_populates="host_user")
 
 User.update_forward_refs()
