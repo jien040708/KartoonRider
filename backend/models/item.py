@@ -4,6 +4,7 @@ from datetime import datetime
 
 # 상점에 등록된 아이템
 class StoreItem(SQLModel, table=True):
+    __tablename__ = "store_items"
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     description: Optional[str] = None
@@ -15,7 +16,7 @@ class StoreItem(SQLModel, table=True):
 # 사용자가 보유한 아이템
 class UserItem(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id")
-    item_id: int = Field(foreign_key="storeitem.id")
+    user_id: int = Field(foreign_key="users.id")
+    item_id: int = Field(foreign_key="store_items.id")
     is_equipped: bool = Field(default=False)
     acquired_at: datetime = Field(default_factory=datetime.utcnow)
