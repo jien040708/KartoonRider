@@ -1,24 +1,40 @@
+# Unity generated folders
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
-MemoryCaptures/
 UserSettings/
+MemoryCaptures/
+
+# Visual Studio Code
 .vscode/
-*.csproj
-*.unityproj
-*.sln
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Unity auto-generated files
+*.pidb
+*.suo
 *.user
+*.userprefs
+*.unityproj
+*.tmproj
 *.booproj
-*.pyc
-venv/
-.env/
-.venv/
-.pytest_cache/
-.DS_store
-.mypy_cache/
-.coverage/
-htmlcov/
-*.log
+
+# Crash reports
+*.stacktrace
+
+# Other
+*.swp
+*.bak
+*.tmp
+
+# Asset meta files (keep these!)
+*.meta
+
+# Uncomment if you use Rider
+ .idea/
+ *.sln.iml

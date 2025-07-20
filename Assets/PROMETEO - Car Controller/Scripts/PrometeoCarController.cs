@@ -158,9 +158,28 @@ public class PrometeoCarController : MonoBehaviour
       WheelFrictionCurve RRwheelFriction;
       float RRWextremumSlip;
 
+    void SetPlayerTagRecursively(GameObject obj)
+    {
+        // 현재 객체에 Player 태그 설정
+        if (obj.tag != "Player")
+        {
+            obj.tag = "Player";
+            Debug.Log($"'{obj.name}'에 Player 태그가 설정되었습니다.");
+        }
+
+        // 모든 하위 객체에도 Player 태그 설정
+        foreach (Transform child in obj.transform)
+        {
+            SetPlayerTagRecursively(child.gameObject);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
+      // 자동으로 Player 태그 설정 (모든 하위 객체 포함)
+      SetPlayerTagRecursively(gameObject);
+
       //In this part, we set the 'carRigidbody' value with the Rigidbody attached to this
       //gameObject. Also, we define the center of mass of the car with the Vector3 given
       //in the inspector.
