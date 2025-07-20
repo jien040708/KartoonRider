@@ -2,27 +2,22 @@ using UnityEngine;
 
 public class RearWheelDrive : MonoBehaviour
 {
-    [Header("Wheel Colliders")]
     public WheelCollider frontLeftWheelCollider;
     public WheelCollider frontRightWheelCollider;
     public WheelCollider rearLeftWheelCollider;
     public WheelCollider rearRightWheelCollider;
 
-    [Header("Wheel Mesh Transforms")]
     public Transform frontLeftWheelTransform;
     public Transform frontRightWheelTransform;
     public Transform rearLeftWheelTransform;
     public Transform rearRightWheelTransform;
 
-    [Header("Driving")]
-    public float motorTorque = 500f;
-    public float maxSteerAngle = 60f;
-    public float brakeForce = 1000f;
+    public float motorTorque = 1500f;
+    public float maxSteerAngle = 30f;
+    public float driftSteerMultiplier = 1.7f;
 
-    [Header("Drifting")]
-    public float driftSteerMultiplier = 1.5f;
-    public float normalStiffness = 2.0f;
-    public float driftStiffness = 1.0f;
+    public float normalStiffness = 1.5f;
+    public float driftStiffness = 0.4f;
 
     private float inputVertical;
     private float inputHorizontal;
@@ -30,11 +25,24 @@ public class RearWheelDrive : MonoBehaviour
 
     void Start()
     {
-        // 초기 마찰력 설정
-        ApplyStiffnessToAllWheels(normalStiffness);
-        ApplyStiffnessToAllWheels(normalStiffness);
-        GetComponent<Rigidbody>().centerOfMass = new Vector3(0, -0.5f, 0); // 중앙, 약간 아래로
+        // 자동으로 Player 태그 설정 (모든 하위 객체 포함)
+        SetPlayerTagRecursively(gameObject);
+    }
 
+    void SetPlayerTagRecursively(GameObject obj)
+    {
+        // 현재 객체에 Player 태그 설정
+        if (obj.tag != "Player")
+        {
+            obj.tag = "Player";
+            Debug.Log($"'{obj.name}'에 Player 태그가 설정되었습니다.");
+        }
+
+        // 모든 하위 객체에도 Player 태그 설정
+        foreach (Transform child in obj.transform)
+        {
+            SetPlayerTagRecursively(child.gameObject);
+        }
     }
 
     void Update()
@@ -42,87 +50,83 @@ public class RearWheelDrive : MonoBehaviour
         inputVertical = Input.GetAxis("Vertical");
         inputHorizontal = Input.GetAxis("Horizontal");
 
-        // ✅ 방향 무관하게 드리프트 허용 (Shift + 좌우)
-        isDrifting = Input.GetKey(KeyCode.LeftShift) && Mathf.Abs(inputHorizontal) > 0.1f;
+        // ❗ 왼쪽 드리프트도 가능하게
+        isDrifting = Input.GetKey(KeyCode.LeftShift) && Mathf.Abs(inputHorizontal) > 0.2f;
     }
 
     void FixedUpdate()
     {
-        ApplyMotorTorque();
+        ApplyMotor();
         ApplySteering();
         ApplyDriftFriction();
-        ApplyBrakes();
         UpdateWheelVisuals();
     }
 
-    void ApplyBrakes()
+    void ApplyMotor()
     {
-    // 키를 누르지 않을 때(가속 입력 거의 없음) 브레이크 적용
-    bool isBraking = Mathf.Abs(inputVertical) < 0.01f;
-    float brake = isBraking ? brakeForce : 0f;
-
-    rearLeftWheelCollider.brakeTorque = brake;
-    rearRightWheelCollider.brakeTorque = brake;
-    frontLeftWheelCollider.brakeTorque = brake;
-    frontRightWheelCollider.brakeTorque = brake;
-    }
-
-    void ApplyMotorTorque()
-    {
-        float torque = inputVertical * motorTorque;
-        rearLeftWheelCollider.motorTorque = torque;
-        rearRightWheelCollider.motorTorque = torque;
+        if (rearLeftWheelCollider != null)
+            rearLeftWheelCollider.motorTorque = inputVertical * motorTorque;
+        if (rearRightWheelCollider != null)
+            rearRightWheelCollider.motorTorque = inputVertical * motorTorque;
     }
 
     void ApplySteering()
     {
+        // ❗ 드리프트 시 방향 유지하면서 회전 더 크게
         float steerAngle = inputHorizontal * maxSteerAngle;
         if (isDrifting)
             steerAngle *= driftSteerMultiplier;
 
-        frontLeftWheelCollider.steerAngle = steerAngle;
-        frontRightWheelCollider.steerAngle = steerAngle;
+        if (frontLeftWheelCollider != null)
+            frontLeftWheelCollider.steerAngle = steerAngle;
+        if (frontRightWheelCollider != null)
+            frontRightWheelCollider.steerAngle = steerAngle;
     }
 
     void ApplyDriftFriction()
     {
-        float currentStiffness = isDrifting ? driftStiffness : normalStiffness;
-        ApplyStiffnessToAllWheels(currentStiffness);
+        float stiffness = isDrifting ? driftStiffness : normalStiffness;
+
+        if (frontLeftWheelCollider != null)
+            SetFriction(frontLeftWheelCollider, stiffness);
+        if (frontRightWheelCollider != null)
+            SetFriction(frontRightWheelCollider, stiffness);
+        if (rearLeftWheelCollider != null)
+            SetFriction(rearLeftWheelCollider, stiffness);
+        if (rearRightWheelCollider != null)
+            SetFriction(rearRightWheelCollider, stiffness);
     }
 
-    void ApplyStiffnessToAllWheels(float stiffness)
+    void SetFriction(WheelCollider wc, float stiffness)
     {
-        SetWheelFriction(frontLeftWheelCollider, stiffness);
-        SetWheelFriction(frontRightWheelCollider, stiffness);
-        SetWheelFriction(rearLeftWheelCollider, stiffness);
-        SetWheelFriction(rearRightWheelCollider, stiffness);
-    }
+        WheelFrictionCurve sideFriction = wc.sidewaysFriction;
+        sideFriction.stiffness = stiffness;
+        wc.sidewaysFriction = sideFriction;
 
-    void SetWheelFriction(WheelCollider collider, float stiffness)
-    {
-        var forwardFriction = collider.forwardFriction;
+        WheelFrictionCurve forwardFriction = wc.forwardFriction;
         forwardFriction.stiffness = stiffness;
-        collider.forwardFriction = forwardFriction;
-
-        var sidewaysFriction = collider.sidewaysFriction;
-        sidewaysFriction.stiffness = stiffness;
-        collider.sidewaysFriction = sidewaysFriction;
+        wc.forwardFriction = forwardFriction;
     }
 
     void UpdateWheelVisuals()
     {
-        UpdateSingleWheel(frontLeftWheelCollider, frontLeftWheelTransform);
-        UpdateSingleWheel(frontRightWheelCollider, frontRightWheelTransform);
-        UpdateSingleWheel(rearLeftWheelCollider, rearLeftWheelTransform);
-        UpdateSingleWheel(rearRightWheelCollider, rearRightWheelTransform);
+        if (frontLeftWheelCollider != null && frontLeftWheelTransform != null)
+            UpdateWheelPose(frontLeftWheelCollider, frontLeftWheelTransform);
+        if (frontRightWheelCollider != null && frontRightWheelTransform != null)
+            UpdateWheelPose(frontRightWheelCollider, frontRightWheelTransform);
+        if (rearLeftWheelCollider != null && rearLeftWheelTransform != null)
+            UpdateWheelPose(rearLeftWheelCollider, rearLeftWheelTransform);
+        if (rearRightWheelCollider != null && rearRightWheelTransform != null)
+            UpdateWheelPose(rearRightWheelCollider, rearRightWheelTransform);
     }
 
-    void UpdateSingleWheel(WheelCollider collider, Transform visual)
+    void UpdateWheelPose(WheelCollider collider, Transform wheelTransform)
     {
         Vector3 pos;
         Quaternion rot;
         collider.GetWorldPose(out pos, out rot);
-        visual.position = pos;
-        visual.rotation = rot;
+        wheelTransform.position = pos;
+        wheelTransform.rotation = rot;
     }
 }
+   
