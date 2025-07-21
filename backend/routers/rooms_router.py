@@ -37,3 +37,11 @@ async def room_info(code: str):
     if not data:
         raise HTTPException(status_code=404, detail="방을 찾을 수 없습니다.")
     return data
+
+@router.delete("/delete/{code}")
+async def delete_room(code:str):
+    deleted = await delete_room_in_redis(code)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="삭제할 방이 없습니다.")
+    
+    return {"deleted":True}

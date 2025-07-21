@@ -44,3 +44,14 @@ async def get_room_info(room_code: str):
     data = await redis.hgetall(key)
     data["players"] = json.loads(data["players"])
     return data
+
+
+async def delete_room_in_redis(room_code: str) -> bool:
+    key = f"room:{room_code}"
+    exists = await redis.exists(key)
+
+    if not exists:
+        return False
+    
+    await redis.delete(key)
+    return True
