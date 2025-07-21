@@ -1,14 +1,6 @@
-# dependencies/redis_client.py
-from redis.asyncio import Redis
+from redis import asyncio as aioredis
 import os
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-REDIS_DB = int(os.getenv("REDIS_DB", 0))
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")  # ← 레일웨이용
 
-redis = Redis(
-    host=REDIS_HOST,
-    port=REDIS_PORT,
-    db=REDIS_DB,
-    decode_responses=True
-)
+redis = aioredis.from_url(REDIS_URL, decode_responses=True)

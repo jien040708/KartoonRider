@@ -23,7 +23,7 @@ public class CoinDisplay : MonoBehaviour
 
     public void Start()
     {
-        accessToken = PlayerPrefs.GetString("access_token", "");
+        accessToken = PlayerPrefs.GetString("AuthToken", "");
         if (string.IsNullOrEmpty(accessToken))
         {
             Debug.LogError("Access Token이 없습니다. 로그인 먼저 해주세요.");
@@ -34,7 +34,7 @@ public class CoinDisplay : MonoBehaviour
 
     IEnumerator GetCoinFromServer()
     {
-        string url = "https://kartoonrider-production.up.railway.app/auth/me";
+        string url = "https://kartoonrider-production-b878.up.railway.app/auth/me";
         UnityWebRequest www = UnityWebRequest.Get(url);
         www.SetRequestHeader("Authorization", "Bearer " + accessToken);
         yield return www.SendWebRequest();
