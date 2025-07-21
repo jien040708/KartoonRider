@@ -15,14 +15,6 @@ MemoryCaptures/
 .DS_Store
 Thumbs.db
 
-# Unity auto-generated files
-*.pidb
-*.suo
-*.user
-*.userprefs
-*.unityproj
-*.tmproj
-*.booproj
 
 # Crash reports
 *.stacktrace

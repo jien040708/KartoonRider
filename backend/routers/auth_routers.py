@@ -75,5 +75,6 @@ def get_me(request: Request, db: Session = Depends(get_db_session)):
         "login_id": user.login_id,
         "nickname": user.nickname,
         "rating": user.rating,
+        "coin": user.coin,
         "created_at": user.created_at
     }
