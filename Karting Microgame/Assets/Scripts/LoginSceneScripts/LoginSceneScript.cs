@@ -38,7 +38,7 @@ public class LoginSceneScript : MonoBehaviour
     public void OnLoginButtonClicked()
     {
         string id = loginIdInput.text;
-        string pw = loginIdInput.text;
+        string pw = loginPwInput.text;
 
         StartCoroutine(LoginRequest(id, pw));
     }
@@ -139,6 +139,9 @@ public class LoginSceneScript : MonoBehaviour
             PlayerPrefs.SetString("AuthToken", data.access_token);
             PlayerPrefs.Save();
             Debug.Log("로그인 토큰이 저장되었습니다: " + data.access_token);
+
+            UserManager.Instance.SetUserId(data.user_id);
+
         }
         else
         {
@@ -169,6 +172,7 @@ public class LoginSceneScript : MonoBehaviour
     {
         public string access_token;
         public string token_type;
+        public int user_id;
     }
 
     [System.Serializable]

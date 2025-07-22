@@ -79,7 +79,7 @@ public class RoomManager : MonoBehaviour
 
     IEnumerator CreateRoomRequest()
     {
-        int host_id = 1;
+        int host_id = UserManager.Instance.UserId;
         string url = $"https://kartoonrider-production-b878.up.railway.app/rooms/create/{host_id}";
 
         // body: {"name": "MyRoom"}
@@ -99,6 +99,10 @@ public class RoomManager : MonoBehaviour
             RoomCodeResponse data = JsonUtility.FromJson<RoomCodeResponse>(result);
             roomCodeText.text = data.room_code;
             roomStatusUI.SetRoomCode(data.room_code);
+
+
+            RoomWebSocket.Instance.Connect(data.room_code, host_id.ToString());
+
             Player.SetActive(false);
             popupCreateResult.SetActive(true);
             popupBackgroundOverlay.SetActive(true);
@@ -121,7 +125,7 @@ public class RoomManager : MonoBehaviour
 
     IEnumerator JoinRoomRequest(string code)
     {
-        int userId = 1;
+        int userId = UserManager.Instance.UserId;
         string url = $"https://kartoonrider-production-b878.up.railway.app/rooms/join/{code}";
 
         // body: {"user_id": 1}
@@ -139,11 +143,15 @@ public class RoomManager : MonoBehaviour
         {
             Debug.Log("참가 성공");
             roomStatusUI.SetRoomCode(code);
-            
+
             popupJoinInput.SetActive(false);
             popupBackgroundOverlay.SetActive(false);
             Player.SetActive(true);
+
+            roomStatusUI.SetRoomCode(code); //복귀2
             roomStatusUI.ShowAfterJoinPanel();
+
+            RoomWebSocket.Instance.Connect(code, userId.ToString());
         }
         else
         {
