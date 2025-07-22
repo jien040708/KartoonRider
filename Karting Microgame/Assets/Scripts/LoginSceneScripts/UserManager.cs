@@ -11,10 +11,15 @@ public class UserManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject); // 씬 넘어가도 유지
+            Debug.Log("✅ UserManager 인스턴스 생성됨");
+
         }
         else
         {
+            Debug.LogWarning("⚠️ 중복 UserManager 제거됨");
+
             Destroy(gameObject);
+
         }
     }
 

@@ -34,7 +34,12 @@ public class RoomStatusUI : MonoBehaviour
         // 이 메소드는 웹소켓으로부터 호출되어 현재 플레이어 수를 업데이트합니다.
         // 예시로 임의의 값으로 업데이트합니다.
         currentPlayers = Random.Range(1, totalPlayers + 1); // 예시로 랜덤하게 플레이어 수를 설정
-        ShowAfterJoinPanel(); // UI 업데이트
+        if(deleteRoomButton.gameObject.activeSelf){
+            ShowAfterCreatePanel();
+        }
+        if(leaveRoomButton.gameObject.activeSelf){
+            ShowAfterJoinPanel(); // UI 업데이트
+        }
     }
 
 
