@@ -26,6 +26,7 @@ async def websocket_endpoint(websocket: WebSocket, room_code: str, user_id: str)
 
     # 플레이어 ID 할당 (방에 입장한 순서대로 1, 2, 3, 4)
     player_id = len(active_connections[room_code]) + 1
+    print(f"방 {room_code}에 {user_id} 입장, 플레이어 ID {player_id} 할당 예정")
     
     # 유저 등록
     active_connections[room_code][user_id] = websocket
@@ -33,7 +34,8 @@ async def websocket_endpoint(websocket: WebSocket, room_code: str, user_id: str)
     try:
         # 플레이어 ID 전송
         await websocket.send_text(f"__PLAYER_ID__:{player_id}")
-        print(f"플레이어 ID 할당: {user_id} -> {player_id}")
+        print(f"플레이어 ID 할당 완료: {user_id} -> {player_id}")
+        print(f"현재 방 인원: {len(active_connections[room_code])}")
         
         # 입장 메시지 전송
         await broadcast_message(

@@ -18,6 +18,12 @@ public class MultiplayerPlayerManager : MonoBehaviour
     
     void Start()
     {
+        // Inspector에서 연결되지 않은 경우 자동으로 찾기
+        if (player1 == null) player1 = GameObject.Find("Player_1");
+        if (player2 == null) player2 = GameObject.Find("Player_2");
+        if (player3 == null) player3 = GameObject.Find("Player_3");
+        if (player4 == null) player4 = GameObject.Find("Player_4");
+        
         // 플레이어들 등록
         RegisterPlayers();
         
@@ -30,6 +36,12 @@ public class MultiplayerPlayerManager : MonoBehaviour
     
     void RegisterPlayers()
     {
+        // null 체크 추가
+        if (player1 == null) Debug.LogError("Player 1이 연결되지 않았습니다!");
+        if (player2 == null) Debug.LogError("Player 2가 연결되지 않았습니다!");
+        if (player3 == null) Debug.LogError("Player 3이 연결되지 않았습니다!");
+        if (player4 == null) Debug.LogError("Player 4가 연결되지 않았습니다!");
+        
         players[1] = player1;
         players[2] = player2;
         players[3] = player3;
@@ -64,7 +76,7 @@ public class MultiplayerPlayerManager : MonoBehaviour
     {
         foreach (var kvp in players)
         {
-            if (kvp.Key != currentPlayerId)
+            if (kvp.Key != currentPlayerId && kvp.Value != null)
             {
                 var kart = kvp.Value.GetComponent<ArcadeKart>();
                 if (kart != null)
@@ -74,6 +86,14 @@ public class MultiplayerPlayerManager : MonoBehaviour
                     kart.enabled = false;
                     Debug.Log($"{kvp.Value.name} 조작 비활성화");
                 }
+                else
+                {
+                    Debug.LogError($"{kvp.Value.name}에 ArcadeKart 컴포넌트가 없습니다!");
+                }
+            }
+            else if (kvp.Value == null)
+            {
+                Debug.LogError($"플레이어 {kvp.Key}가 null입니다!");
             }
         }
     }
