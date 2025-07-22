@@ -1,7 +1,7 @@
 # main.py
 from fastapi import FastAPI
 from dependencies.db import create_db_and_table
-from routers import auth_routers, rooms_router, websocket_router, scores_routers, store_routers
+from routers import auth_routers, rooms_router, websocket_router, scores_routers, store_routers, debug_routers
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -24,3 +24,4 @@ app.include_router(rooms_router.router)
 app.include_router(websocket_router.router)
 app.include_router(scores_routers.router)
 app.include_router(store_routers.router)
+app.include_router(debug_routers.router)
