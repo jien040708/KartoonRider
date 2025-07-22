@@ -50,7 +50,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db_session)):
         raise HTTPException(status_code=401, detail="로그인 실패: 잘못된 정보")
     
     token = jwt_util.create_token({"sub": str(user.id)})
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer", "user_id": user.id}
 
 
 # ✅ 내 정보 조회 (토큰 필요)
