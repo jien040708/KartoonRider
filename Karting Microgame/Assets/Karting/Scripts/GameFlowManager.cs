@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Playables;
 using KartGame.KartSystems;
 using UnityEngine.SceneManagement;
+using System;
 
 public enum GameState{Play, Won, Lost}
 
@@ -155,6 +156,14 @@ public class GameFlowManager : MonoBehaviour
 
         m_TimeManager.StopRace();
 
+        // 멀티플레이어 게임 종료 메시지 전송
+        var roomWebSocketObj = GameObject.Find("RoomWebSocketManager");
+        if (roomWebSocketObj != null)
+        {
+            roomWebSocketObj.SendMessage("SendMessage", "__GAME_END__");
+            Debug.Log("🏁 __GAME_END__ 메시지 전송됨");
+        }
+
         // Remember that we need to load the appropriate end scene after a delay
         gameState = win ? GameState.Won : GameState.Lost;
         endGameFadeCanvasGroup.gameObject.SetActive(true);
@@ -162,7 +171,7 @@ public class GameFlowManager : MonoBehaviour
         {
             m_SceneToLoad = winSceneName;
             m_TimeLoadEndGameScene = Time.time + endSceneLoadDelay + delayBeforeFadeToBlack;
-
+            
             // play a sound on win
             var audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.clip = victorySound;

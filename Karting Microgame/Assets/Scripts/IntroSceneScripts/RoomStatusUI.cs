@@ -22,6 +22,8 @@ public class RoomStatusUI : MonoBehaviour
     public int currentUserId;     // 현재 로그인한 유저 ID
     private const string apiBaseUrl = "https://kartoonrider-production-b878.up.railway.app"; // 너 API 주소로 바꿔줘
 
+    private bool isGameStarting = false; // 게임 시작 중 상태
+
     public void SetRoomCode(string code)
     {
         roomCode = code;
@@ -32,17 +34,52 @@ public class RoomStatusUI : MonoBehaviour
     {
         currentPlayers = count;
         UpdatePlayerCount();
+        
+        // 4명이 모이면 시각적 피드백
+        if (count >= 4 && !isGameStarting)
+        {
+            StartCoroutine(ShowGameReadyEffect());
+        }
     }
 
-
-
+    private IEnumerator ShowGameReadyEffect()
+    {
+        isGameStarting = true;
+        
+        // 상태 텍스트를 깜빡이는 효과
+        for (int i = 0; i < 3; i++)
+        {
+            if (statusText != null)
+            {
+                statusText.text = "Ready!";
+                statusText.color = Color.green;
+            }
+            yield return new WaitForSeconds(0.5f);
+            
+            if (statusText != null)
+            {
+                statusText.text = $"{currentPlayers} / {totalPlayers}";
+                statusText.color = Color.white;
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
+        
+        if (statusText != null)
+        {
+            statusText.text = "GO!";
+            statusText.color = Color.yellow;
+        }
+    }
 
     public void UpdatePlayerCount() // 웹소켓 또는 외부에서 호출
     {
         float ratio = (float)currentPlayers / totalPlayers;
         progressBar.value = ratio;
 
-        statusText.text = $"{currentPlayers} / {totalPlayers}";
+        if (!isGameStarting)
+        {
+            statusText.text = $"{currentPlayers} / {totalPlayers}";
+        }
 
         if (deleteRoomButton.gameObject.activeSelf)
         {
@@ -55,14 +92,15 @@ public class RoomStatusUI : MonoBehaviour
         }
     }
 
-
-
     public void ShowAfterJoinPanel() // 외부 패널 조절 스크립트에서 호출하기
     {
         float ratio = (float)currentPlayers / totalPlayers;
         progressBar.value = ratio;
 
-        statusText.text = $"{currentPlayers} / {totalPlayers}";
+        if (!isGameStarting)
+        {
+            statusText.text = $"{currentPlayers} / {totalPlayers}";
+        }
         roomCodeText.text = roomCode;
 
         deleteRoomButton.gameObject.SetActive(false);
@@ -77,7 +115,10 @@ public class RoomStatusUI : MonoBehaviour
         float ratio = (float)currentPlayers / totalPlayers;
         progressBar.value = ratio;
 
-        statusText.text = $"{currentPlayers} / {totalPlayers}";
+        if (!isGameStarting)
+        {
+            statusText.text = $"{currentPlayers} / {totalPlayers}";
+        }
         roomCodeText.text = roomCode;
 
         deleteRoomButton.gameObject.SetActive(true);
@@ -86,7 +127,6 @@ public class RoomStatusUI : MonoBehaviour
         beforeJoinPanel.SetActive(false);
         afterJoinPanel.SetActive(true);
     }   
-
 
     public void OnLeaveRoomButtonClicked()
     {
@@ -127,7 +167,6 @@ public class RoomStatusUI : MonoBehaviour
             Debug.LogError("방 나가기 실패: " + request.error + " / " + request.downloadHandler.text);
         }
     }
-
 
     IEnumerator CallDeleteRoomAPI()
     {
