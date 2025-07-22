@@ -58,3 +58,13 @@ async def websocket_endpoint(websocket: WebSocket, room_code: str, user_id: str)
                 room_code,
                 f"❌ {user_id} left. 현재 인원: {len(active_connections[room_code])}"
             )
+
+@router.get("/room/{room_code}/count")
+async def get_room_player_count(room_code: str):
+    if room_code not in active_connections:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    return {
+        "room_code": room_code,
+        "current_players": len(active_connections[room_code])
+    }

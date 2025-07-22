@@ -14,10 +14,6 @@ public class LoginSceneScript : MonoBehaviour
     public TMP_InputField signUpPwInput;
     public TMP_InputField nicknameInput;
 
-    private string id;
-    private string pw;
-    private string nickname;
-
     public GameObject errorSet; // ErrorSet 오브젝트 연결
     public GameObject signUpError;
     
@@ -38,34 +34,22 @@ public class LoginSceneScript : MonoBehaviour
         signUpError.SetActive(false);
     }
 
-    // ID 입력값 변경 시 호출되는 함수
-    public void OnIdInputValueChanged(string value)
-    {
-        id = value;
-        Debug.Log("ID 입력: " + value);
-    }
-
-    // PW 입력값 변경 시 호출되는 함수
-    public void OnPwInputValueChanged(string value)
-    {
-        pw = value;
-        Debug.Log("PW 입력: " + value);
-    }
-
-    public void OnNicknameInputValueChanged(string value)
-    {
-        nickname = value;
-        Debug.Log("Nickname 입력: " + value);
-    }
 
     public void OnLoginButtonClicked()
     {
+        string id = signUpIdInput.text;
+        string pw = signUpPwInput.text;
+
         StartCoroutine(LoginRequest(id, pw));
     }
 
     public void OnSignUpButtonClicked()
     {
-        StartCoroutine(SignupRequest(id, pw, nickname));
+        string id = signUpIdInput.text;
+        string pw = signUpPwInput.text;
+        string name = nicknameInput.text;
+
+        StartCoroutine(SignupRequest(id, pw, name));
     }
 
     public void OnGotoSignUpButton(){
@@ -116,10 +100,11 @@ public class LoginSceneScript : MonoBehaviour
         }
     }
 
-    IEnumerator SignupRequest(string id, string pw, string nickname)
+    IEnumerator SignupRequest(string id, string pw, string name)
     {
         string url = "https://kartoonrider-production-b878.up.railway.app/auth/register";
-        string json = JsonUtility.ToJson(new SignupRequestData(id, pw, nickname));
+        string json = JsonUtility.ToJson(new SignupRequestData(id, pw, name));
+        Debug.Log(json);
 
         UnityWebRequest www = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
@@ -164,7 +149,7 @@ public class LoginSceneScript : MonoBehaviour
     void LoadIntroScene()
     {
         Debug.Log("IntroScene으로 전환합니다.");
-        SceneManager.LoadScene("StoreScene");
+        SceneManager.LoadScene("IntroScene");
     }
 
     [System.Serializable]

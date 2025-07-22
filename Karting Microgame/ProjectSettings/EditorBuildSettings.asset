@@ -21,7 +21,7 @@ EditorBuildSettings:
     path: Assets/Karting/Scenes/LoginScene.unity
     guid: 7a313417c5db2469ab41c934c52e29aa
   - enabled: 1
-    path: Assets/Karting/Scenes/StoreScene.unity
+    path: Assets/Karting/Scenes/IntroScene.unity
     guid: dc33048b577fa46fd987458e3bcee0d5
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

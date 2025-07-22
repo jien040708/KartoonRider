@@ -73,13 +73,12 @@ public class RoomManager : MonoBehaviour
             popupJoinFailedWarn.SetActive(false);
         }
         Player.SetActive(true); // 플레이어 오브젝트 활성화
-        roomStatusUI.ShowAfterCreatePanel();
     }
 
     IEnumerator CreateRoomRequest()
     {
         int host_id = 1; //실제 로그인 한 유저 id 갖고 오는 로직 추가
-        UnityWebRequest req = UnityWebRequest.Get($"https://kartoonrider-production.up.railway.app/rooms/create/host_id={host_id}");
+        UnityWebRequest req = new UnityWebRequest($"https://kartoonrider-production.up.railway.app/rooms/create/{host_id}", "POST");
         yield return req.SendWebRequest();
 
         if (req.result == UnityWebRequest.Result.Success)
@@ -100,7 +99,7 @@ public class RoomManager : MonoBehaviour
 
     IEnumerator JoinRoomRequest(string code)
     {
-        UnityWebRequest req = UnityWebRequest.Get($"https://kartoonrider-production.up.railway.app/rooms/join/code={code}");
+        UnityWebRequest req = new UnityWebRequest($"https://kartoonrider-production.up.railway.app/rooms/join/{code}", "POST");
         yield return req.SendWebRequest();
 
         if (req.result == UnityWebRequest.Result.Success)

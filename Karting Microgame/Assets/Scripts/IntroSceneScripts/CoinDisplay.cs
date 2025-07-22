@@ -5,6 +5,12 @@ using System.Collections;
 
 // UserInfo 클래스를 여기에 정의하거나, 별도 파일로 관리할 수 있습니다.
 [System.Serializable]
+public class UserInfoWrapper
+{
+    public UserInfo user;
+}
+
+[System.Serializable]
 public class UserInfo
 {
     public int id;
