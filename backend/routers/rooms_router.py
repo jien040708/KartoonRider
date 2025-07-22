@@ -5,7 +5,7 @@ from dependencies.redis_client import redis
 from models.user import User
 from pydantic import BaseModel
 from services.room_service import *
-from websocket_router import broadcast_message
+from routers.websocket_router import broadcast_message
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
