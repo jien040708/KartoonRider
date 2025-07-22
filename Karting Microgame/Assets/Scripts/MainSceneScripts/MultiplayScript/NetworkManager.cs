@@ -4,9 +4,11 @@ using WebSocketSharp;
 
 public class NetworkManager : MonoBehaviour
 {
+    private string BASE_URL = "kartoonrider-production-b878.up.railway.app/";
     public GameObject kartPrefab;    // KartClassic_MLAgent 프리팹
     public GameObject myKart;        // 내가 조작하는 카트 오브젝트
     public string myUserId; // 로그인 되어있는 유저 login_id
+    public string roomcode;
 
     private WebSocket ws;
     private Dictionary<string, GameObject> players = new();
@@ -17,7 +19,7 @@ public class NetworkManager : MonoBehaviour
 
     void Start()
     {
-        ws = new WebSocket("ws://your-server/ws/ROOM123/" + myUserId);  // 주소는 실제 서버로 교체
+        ws = new WebSocket($"wss://kartoonrider-production.up.railway.app/ws/{roomcode}/{myUserId}");  // 주소는 실제 서버로 교체
         ws.OnMessage += OnMessageReceived;
         ws.Connect();
     }

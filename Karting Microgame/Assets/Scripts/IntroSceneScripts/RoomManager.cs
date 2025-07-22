@@ -150,6 +150,7 @@ public class RoomManager : MonoBehaviour
 
             roomStatusUI.SetRoomCode(code); //복귀2
             roomStatusUI.ShowAfterJoinPanel();
+            Debug.Log(code);
 
             RoomWebSocket.Instance.Connect(code, userId.ToString());
         }
