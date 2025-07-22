@@ -26,12 +26,16 @@ public class LoginSceneScript : MonoBehaviour
     public Button gotoLoginButton;
 
 
+
     void Start()
     {
+    
         LoginPanel.SetActive(true);
         SignUpPanel.SetActive(false);
         errorSet.SetActive(false);
         signUpError.SetActive(false);
+
+        
     }
 
 
@@ -78,6 +82,7 @@ public class LoginSceneScript : MonoBehaviour
         if (www.result == UnityWebRequest.Result.Success)
         {
             Debug.Log("로그인 성공: " + www.downloadHandler.text);
+        
             SaveLoginToken(www.downloadHandler.text);
             if (errorSet != null)
                 errorSet.SetActive(false); // 성공 시 에러 배경 숨김
@@ -131,7 +136,9 @@ public class LoginSceneScript : MonoBehaviour
     }
 
     void SaveLoginToken(string responseJson)
-    {
+    {   
+        Debug.Log("서버 응답 JSON: " + responseJson);
+
         // 응답 JSON을 파싱해서 access_token만 저장
         LoginResponseData data = JsonUtility.FromJson<LoginResponseData>(responseJson);
         if (!string.IsNullOrEmpty(data.access_token))
@@ -139,8 +146,18 @@ public class LoginSceneScript : MonoBehaviour
             PlayerPrefs.SetString("AuthToken", data.access_token);
             PlayerPrefs.Save();
             Debug.Log("로그인 토큰이 저장되었습니다: " + data.access_token);
+            
+
+            if (UserManager.Instance == null)
+            {
+                GameObject userManagerPrefab = Resources.Load<GameObject>("UserManager");
+                Instantiate(userManagerPrefab);
+            }
 
             UserManager.Instance.SetUserId(data.user_id);
+            Debug.Log("✅ SetUserId 호출 완료");
+            
+
 
         }
         else

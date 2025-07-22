@@ -100,7 +100,8 @@ public class RoomManager : MonoBehaviour
             roomCodeText.text = data.room_code;
             roomStatusUI.SetRoomCode(data.room_code);
 
-
+            Debug.Log(data.room_code);
+            Debug.Log(host_id.ToString());
             RoomWebSocket.Instance.Connect(data.room_code, host_id.ToString());
 
             Player.SetActive(false);
@@ -108,7 +109,7 @@ public class RoomManager : MonoBehaviour
             popupBackgroundOverlay.SetActive(true);
         }
         else
-        {
+        {   
             Debug.LogError("방 생성 실패: " + req.responseCode + " / " + req.error);
             Player.SetActive(false);
             createFailedButton.gameObject.SetActive(true);
@@ -150,8 +151,8 @@ public class RoomManager : MonoBehaviour
 
             roomStatusUI.SetRoomCode(code); //복귀2
             roomStatusUI.ShowAfterJoinPanel();
+            Debug.Log(userId.ToString());
             Debug.Log(code);
-
             RoomWebSocket.Instance.Connect(code, userId.ToString());
         }
         else
