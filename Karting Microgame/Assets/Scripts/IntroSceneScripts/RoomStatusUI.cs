@@ -10,18 +10,23 @@ public class RoomStatusUI : MonoBehaviour
     public GameObject beforeJoinPanel; // 방 참가 전 UI 패널
     public Slider progressBar;
     public TMP_Text statusText;
-    public TMP_Text roomNameText;
+    public TMP_Text roomCodeText;
     public Button leaveRoomButton;
     public Button deleteRoomButton;
     
     public int totalPlayers = 4; // 실제 방 최대 플레이어 수 로직
     private int currentPlayers = 0; // 실제 방 참가 플레이어 수 로직
-    private string roomName = "Room Name"; // 실제 방 이름 로직
+    public string roomCode;
 
-    public int roomId;            // 방 ID
     public int hostUserId;        // 호스트 유저 ID
     public int currentUserId;     // 현재 로그인한 유저 ID
-    private const string apiBaseUrl = "https://kartoonrider-production.up.railway.app/"; // 너 API 주소로 바꿔줘
+    private const string apiBaseUrl = "https://kartoonrider-production-b878.up.railway.app"; // 너 API 주소로 바꿔줘
+
+    public void SetRoomCode(string code)
+    {
+        roomCode = code;
+        roomCodeText.text = code; // UI에도 바로 반영
+    }
 
 
     public void UpdatePlayerCount() //웹소켓으로 호출되는 메소드
@@ -39,7 +44,7 @@ public class RoomStatusUI : MonoBehaviour
         progressBar.value = ratio;
 
         statusText.text = $"{currentPlayers} / {totalPlayers}";
-        roomNameText.text = roomName;
+        roomCodeText.text = roomCode;
 
         deleteRoomButton.gameObject.SetActive(false);
         leaveRoomButton.gameObject.SetActive(true);
@@ -54,7 +59,7 @@ public class RoomStatusUI : MonoBehaviour
         progressBar.value = ratio;
 
         statusText.text = $"{currentPlayers} / {totalPlayers}";
-        roomNameText.text = roomName;
+        roomCodeText.text = roomCode;
 
         deleteRoomButton.gameObject.SetActive(true);
         leaveRoomButton.gameObject.SetActive(false);
@@ -78,7 +83,7 @@ public class RoomStatusUI : MonoBehaviour
 
     IEnumerator CallLeaveRoomAPI()
     {
-        string url = $"{apiBaseUrl}/rooms/leave/{roomId}";
+        string url = $"{apiBaseUrl}/rooms/leave/{roomCode}"; //복귀
         UnityWebRequest request = UnityWebRequest.PostWwwForm(url, "");
         yield return request.SendWebRequest();
 
@@ -96,7 +101,7 @@ public class RoomStatusUI : MonoBehaviour
 
     IEnumerator CallDeleteRoomAPI()
     {
-        string url = $"{apiBaseUrl}/{roomId}"; // 방 삭제 API URL
+        string url = $"{apiBaseUrl}/rooms/delete/{roomCode}"; // 방 삭제 API URL
         UnityWebRequest request = UnityWebRequest.Delete(url);
         yield return request.SendWebRequest();
 
