@@ -1,5 +1,7 @@
 using NativeWebSocket;
 using UnityEngine;
+using System.Collections;
+
 
 public class RoomWebSocket : MonoBehaviour
 {
@@ -31,19 +33,11 @@ public class RoomWebSocket : MonoBehaviour
             if (msg == "__ROOM_DELETED__")
             {
                 Debug.LogWarning("⚠️ 방이 삭제되어 연결을 종료합니다.");
-                UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                {
-                    // UI 초기화
-                    RoomStatusUI ui = FindObjectOfType<RoomStatusUI>();
-                    if (ui != null)
-                    {
-                        ui.beforeJoinPanel.SetActive(true);
-                        ui.afterJoinPanel.SetActive(false);
-                    }
-                });
-                _ = websocket.Close();  // 비동기로 웹소켓 연결 끊기
+                StartCoroutine(HandleRoomDeletedUI());
+                _ = websocket.Close();
                 return;
             }
+
 
 
             // "현재 인원: " 뒤의 숫자 추출
@@ -91,11 +85,24 @@ public class RoomWebSocket : MonoBehaviour
         }
     }
 
+    private IEnumerator HandleRoomDeletedUI()
+    {
+        yield return null; // 다음 프레임까지 대기 (UI 접근 안전하게)
+
+        RoomStatusUI ui = FindObjectOfType<RoomStatusUI>();
+        if (ui != null)
+        {
+            ui.beforeJoinPanel.SetActive(true);
+            ui.afterJoinPanel.SetActive(false);
+        }
+    }
+
+
     private void Update()
     {
-#if !UNITY_WEBGL || UNITY_EDITOR
-        websocket?.DispatchMessageQueue();
-#endif
+        #if !UNITY_WEBGL || UNITY_EDITOR
+                websocket?.DispatchMessageQueue();
+        #endif
     }
 
     private async void OnApplicationQuit()
@@ -106,3 +113,5 @@ public class RoomWebSocket : MonoBehaviour
         }
     }
 }
+
+
