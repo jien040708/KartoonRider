@@ -24,13 +24,16 @@ async def websocket_endpoint(websocket: WebSocket, room_code: str, user_id: str)
     if room_code not in active_connections:
         active_connections[room_code] = {}
 
+    # 플레이어 ID 할당 (방에 입장한 순서대로 1, 2, 3, 4)
+    player_id = len(active_connections[room_code]) + 1
+    
     # 유저 등록
     active_connections[room_code][user_id] = websocket
 
     try:
-        # 플레이어 ID 할당 (방에 입장한 순서대로 1, 2, 3, 4)
-        player_id = len(active_connections[room_code])
+        # 플레이어 ID 전송
         await websocket.send_text(f"__PLAYER_ID__:{player_id}")
+        print(f"플레이어 ID 할당: {user_id} -> {player_id}")
         
         # 입장 메시지 전송
         await broadcast_message(
@@ -42,11 +45,17 @@ async def websocket_endpoint(websocket: WebSocket, room_code: str, user_id: str)
         while True:
             data = await websocket.receive_text()
             print(f"[{room_code}] {user_id}: {data}")
-            await broadcast_message(
-                room_code,
-                f"{user_id}: {data}",
-                exclude=user_id
-            )
+            
+            # 멀티플레이어 메시지는 그대로 브로드캐스트
+            if data.startswith("__PLAYER_POSITION__") or data.startswith("__PLAYER_FINISH__"):
+                await broadcast_message(room_code, data, exclude=user_id)
+            else:
+                # 일반 메시지는 유저 ID와 함께 브로드캐스트
+                await broadcast_message(
+                    room_code,
+                    f"{user_id}: {data}",
+                    exclude=user_id
+                )
 
     except WebSocketDisconnect:
         # 연결 종료 시 정리
