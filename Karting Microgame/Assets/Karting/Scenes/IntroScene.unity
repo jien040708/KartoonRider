@@ -1219,11 +1219,11 @@ MonoBehaviour:
   beforeJoinPanel: {fileID: 546715864}
   progressBar: {fileID: 571606327}
   statusText: {fileID: 653312299}
-  roomNameText: {fileID: 422276890}
-  leaveRoomButton: {fileID: 112705001}
+  roomCodeText: {fileID: 422276890}
+  leaveRoomButton: {fileID: 1839542098}
   deleteRoomButton: {fileID: 112705001}
   totalPlayers: 4
-  roomId: 0
+  roomCode: 
   hostUserId: 0
   currentUserId: 0
 --- !u!1 &399272557
@@ -2649,7 +2649,7 @@ MonoBehaviour:
   beforeJoinPanel: {fileID: 546715864}
   Player: {fileID: 1380406715}
   popupCreateResult: {fileID: 227599022}
-  roomCodeText: {fileID: 1404242845}
+  roomCodeText: {fileID: 900181813}
   popupJoinInput: {fileID: 1217231420}
   joinConfirmButton: {fileID: 1296344461}
   joinCancelButton: {fileID: 1528490963}

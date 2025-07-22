@@ -49,16 +49,18 @@ public class RoomManager : MonoBehaviour
     }
 
     public void OnClickJoinRoom()
-    {
+    {   
         popupJoinInput.SetActive(true);
         popupBackgroundOverlay.SetActive(true);
         Player.SetActive(false); // 플레이어 오브젝트 비활성화
     }
 
-    public void OnJoinCodeChanged(String inputCode)
+    public void OnJoinCodeChanged(string value)
     {
+        inputCode = value;
         Debug.Log("현재 입력값: " + inputCode);
     }
+
     public void OnClickJoinConfirm()
     {
         StartCoroutine(JoinRoomRequest(inputCode));
@@ -77,45 +79,81 @@ public class RoomManager : MonoBehaviour
 
     IEnumerator CreateRoomRequest()
     {
-        int host_id = 1; //실제 로그인 한 유저 id 갖고 오는 로직 추가
-        UnityWebRequest req = new UnityWebRequest($"https://kartoonrider-production.up.railway.app/rooms/create/{host_id}", "POST");
+        int host_id = 1;
+        string url = $"https://kartoonrider-production-b878.up.railway.app/rooms/create/{host_id}";
+
+        // body: {"name": "MyRoom"}
+        string json = "{\"name\":\"MyRoom\"}";
+
+        UnityWebRequest req = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+        req.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        req.downloadHandler = new DownloadHandlerBuffer();
+        req.SetRequestHeader("Content-Type", "application/json");
+
         yield return req.SendWebRequest();
 
         if (req.result == UnityWebRequest.Result.Success)
         {
-            string roomCode = req.downloadHandler.text;
-            roomCodeText.text = roomCode;
+            string result = req.downloadHandler.text;
+            RoomCodeResponse data = JsonUtility.FromJson<RoomCodeResponse>(result);
+            roomCodeText.text = data.room_code;
+            roomStatusUI.SetRoomCode(data.room_code);
             Player.SetActive(false);
             popupCreateResult.SetActive(true);
             popupBackgroundOverlay.SetActive(true);
         }
         else
         {
-            Debug.LogError("방 생성 실패: " + req.error);
+            Debug.LogError("방 생성 실패: " + req.responseCode + " / " + req.error);
             Player.SetActive(false);
             createFailedButton.gameObject.SetActive(true);
         }
     }
 
+    [System.Serializable]
+    public class RoomCodeResponse
+    {
+        public string room_code;
+    }
+
+
+
     IEnumerator JoinRoomRequest(string code)
     {
-        UnityWebRequest req = new UnityWebRequest($"https://kartoonrider-production.up.railway.app/rooms/join/{code}", "POST");
+        int userId = 1;
+        string url = $"https://kartoonrider-production-b878.up.railway.app/rooms/join/{code}";
+
+        // body: {"user_id": 1}
+        string json = $"{{\"user_id\":{userId}}}";
+
+        UnityWebRequest req = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+        req.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        req.downloadHandler = new DownloadHandlerBuffer();
+        req.SetRequestHeader("Content-Type", "application/json");
+
         yield return req.SendWebRequest();
 
         if (req.result == UnityWebRequest.Result.Success)
         {
             Debug.Log("참가 성공");
+            roomStatusUI.SetRoomCode(code);
+            
             popupJoinInput.SetActive(false);
             popupBackgroundOverlay.SetActive(false);
-            Player.SetActive(true); // 플레이어 오브젝트 활성화    
-            roomStatusUI.ShowAfterJoinPanel();     
+            Player.SetActive(true);
+            roomStatusUI.ShowAfterJoinPanel();
         }
         else
         {
-            Debug.LogError("참가 실패: " + req.error);
+            Debug.LogError("참가 실패: " + req.responseCode + " / " + req.error);
             popupJoinFailedWarn.SetActive(true);
         }
     }
+
+
+
 
     void Start(){
         popupJoinInput.SetActive(false);
@@ -123,5 +161,8 @@ public class RoomManager : MonoBehaviour
         popupJoinFailedWarn.SetActive(false);
         popupCreateResult.SetActive(false);
         createFailedButton.gameObject.SetActive(false);
+
+        joinCodeInput.onValueChanged.AddListener(OnJoinCodeChanged);
+
     }
 }

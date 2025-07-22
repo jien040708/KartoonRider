@@ -37,8 +37,8 @@ public class LoginSceneScript : MonoBehaviour
 
     public void OnLoginButtonClicked()
     {
-        string id = signUpIdInput.text;
-        string pw = signUpPwInput.text;
+        string id = loginIdInput.text;
+        string pw = loginIdInput.text;
 
         StartCoroutine(LoginRequest(id, pw));
     }
