@@ -40,7 +40,7 @@ public class RoomStatusUI : MonoBehaviour
         UpdatePlayerCount();
         
         // 4명이 모이면 시각적 피드백만 표시 (게임 시작은 PhotonRoomManager에서 처리)
-        if (count >= 4 && !isGameStarting)
+        if (count >= 2 && !isGameStarting)
         {
             StartCoroutine(ShowGameReadyEffect());
         }
