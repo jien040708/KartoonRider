@@ -28,7 +28,6 @@ public class SkinPreviewUpdater : MonoBehaviour
 
         // 위치 초기화 (로컬 위치 0)
         currentCharacter.transform.localPosition = new Vector3(0.00942993164f, -0.200000003f, -0.0899999142f);
-        currentCharacter.transform.localRotation = Quaternion.identity;
         // 🔥 스케일은 그대로 유지
     }
 
@@ -49,7 +48,6 @@ public class SkinPreviewUpdater : MonoBehaviour
 
         // 위치 초기화 (로컬 위치 0)
         currentCharacter.transform.localPosition = new Vector3(0.00942993164f, -0.200000003f, -0.0899999142f);
-        currentCharacter.transform.localRotation = Quaternion.identity;
         // 🔥 스케일은 그대로 유지
 
         var kartAnimator = currentCharacter.GetComponent<Animator>();

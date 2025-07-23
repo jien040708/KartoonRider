@@ -2,11 +2,23 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.VFX;
+using UnityEngine;
 
 namespace KartGame.KartSystems
 {
     public class ArcadeKart : MonoBehaviour
     {
+        [Header("Boost Settings")]
+        public float BoostMultiplier = 10.0f;       // 속도 증가 배율
+        public float BoostDuration = 3f;         // 부스트 유지 시간
+        public float BoostCooldown = 3f;           // 부스트 쿨타임
+
+        private float lastBoostTime = -999f;
+        private bool isBoosting = false;
+        private float boostEndTime = 0f;
+
+
+
         [System.Serializable]
         public class StatPowerup
         {
@@ -288,6 +300,7 @@ namespace KartGame.KartSystems
             UpdateSuspensionParams(RearRightWheel);
 
             GatherInputs();
+            CheckBoostInput();
 
             // apply our powerups to create our finalStats
             TickPowerups();
@@ -334,6 +347,32 @@ namespace KartGame.KartSystems
                 WantsToDrift = Input.Brake && Vector3.Dot(Rigidbody.linearVelocity, transform.forward) > 0.0f;
             }
         }
+
+        void CheckBoostInput()
+        {
+            if (UnityEngine.Input.GetKey(KeyCode.LeftShift) && Time.time > lastBoostTime + BoostCooldown)
+            {
+                isBoosting = true;
+                boostEndTime = Time.time + BoostDuration;
+                lastBoostTime = Time.time;
+            }
+
+            if (Time.time > boostEndTime)
+            {
+                isBoosting = false;
+            }
+
+            foreach (var nozzle in Nozzles)
+            {
+                var ps = nozzle.GetComponentInChildren<ParticleSystem>();
+                if (ps != null)
+                {
+                    if (isBoosting && !ps.isPlaying) ps.Play();
+                    else if (!isBoosting && ps.isPlaying) ps.Stop();
+                }
+            }
+        }
+
 
         void TickPowerups()
         {
@@ -441,6 +480,13 @@ namespace KartGame.KartSystems
 
             float finalAcceleration = finalAccelPower * accelRamp;
 
+            // 부스트 중이면 finalAcceleration과 maxSpeed 모두 올려주기
+            if (isBoosting)
+            {
+                finalAcceleration *= BoostMultiplier;
+                maxSpeed *= BoostMultiplier;
+            }
+
             // apply inputs to forward/backward
             float turningPower = IsDrifting ? m_DriftTurningPower : turnInput * m_FinalStats.Steer;
 
@@ -448,6 +494,7 @@ namespace KartGame.KartSystems
             Vector3 fwd = turnAngle * transform.forward;
             Vector3 movement = fwd * accelInput * finalAcceleration * ((m_HasCollision || GroundPercent > 0.0f) ? 1.0f : 0.0f);
 
+            
             // forward movement
             bool wasOverMaxSpeed = currentSpeed >= maxSpeed;
 

@@ -8,6 +8,8 @@ public class IntroSceneScript : MonoBehaviour
     public GameObject Nami;
     public GameObject Sasuke;
 
+    public GameObject Sahur;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -35,10 +37,18 @@ public class IntroSceneScript : MonoBehaviour
         previewUpdater.ReplacePlayerIdle(chosenCharacter);
     }
 
+    public void OnSahurClicked()
+    {
+        GameObject chosenCharacter = Sahur;
+
+        SkinManager.Instance.SetSkins(chosenCharacter);
+        previewUpdater.ReplacePlayerIdle(chosenCharacter);
+    }
+
     public void OnClickMainScene()
     {
         // 게임 씬으로 넘어가기 >> 씬 넘어가도 저장 되어있는 거 확인하고 나중에 삭제 필요
-        SceneManager.LoadScene("MainScene");
+        SceneManager.LoadScene("MainSceneEdited");
     }
     void Update()
     {

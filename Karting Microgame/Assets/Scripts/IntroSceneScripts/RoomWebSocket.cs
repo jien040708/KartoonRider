@@ -68,9 +68,9 @@ public class RoomWebSocket : MonoBehaviour
                 return;
             }
 
-            // MainScene에서의 멀티플레이어 메시지 처리
+            // MainSceneEdited에서의 멀티플레이어 메시지 처리
             currentScene = SceneManager.GetActiveScene().name;
-            if (currentScene == "MainScene")
+            if (currentScene == "MainSceneEdited")
             {
                 HandleMultiplayerMessage(msg);
                 return;
@@ -227,7 +227,7 @@ public class RoomWebSocket : MonoBehaviour
 
     private IEnumerator StartGame()
     {
-        Debug.Log("🚀 MainScene으로 이동합니다...");
+        Debug.Log("🚀 MainSceneEdited으로 이동합니다...");
         
         // UI 업데이트 (게임 시작 중 메시지)
         RoomStatusUI ui = FindObjectOfType<RoomStatusUI>();
@@ -239,8 +239,8 @@ public class RoomWebSocket : MonoBehaviour
         // 잠시 대기 후 씬 전환
         yield return new WaitForSeconds(1f);
         
-        // MainScene으로 이동
-        SceneManager.LoadScene("MainScene");
+        // MainSceneEdited으로 이동
+        SceneManager.LoadScene("MainSceneEdited");
     }
 
     private void Update()
