@@ -72,6 +72,78 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks
         Debug.Log("방을 나갑니다.");
     }
     
+    // 플레이어 번호 할당 및 방에 저장
+    private void AssignPlayerNumber()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            // 마스터 클라이언트가 모든 플레이어에게 번호 할당
+            AssignPlayerNumbersToAll();
+        }
+        else
+        {
+            // 마스터 클라이언트가 아닌 경우 할당된 번호 대기
+            StartCoroutine(WaitForPlayerNumberAssignment());
+        }
+    }
+    
+    private void AssignPlayerNumbersToAll()
+    {
+        // 사용 가능한 번호들 (0부터 시작)
+        List<int> availableNumbers = new List<int>();
+        for (int i = 0; i < maxPlayersPerRoom; i++)
+        {
+            availableNumbers.Add(i);
+        }
+        
+        // 각 플레이어에게 랜덤 번호 할당
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            if (availableNumbers.Count > 0)
+            {
+                int randomIndex = Random.Range(0, availableNumbers.Count);
+                int playerNumber = availableNumbers[randomIndex];
+                availableNumbers.RemoveAt(randomIndex);
+                
+                // 플레이어의 커스텀 프로퍼티에 번호 저장
+                ExitGames.Client.Photon.Hashtable playerProps = new ExitGames.Client.Photon.Hashtable();
+                playerProps["PlayerNumber"] = playerNumber;
+                player.SetCustomProperties(playerProps);
+                
+                Debug.Log($"플레이어 {player.NickName}에게 번호 {playerNumber} 할당됨");
+            }
+        }
+        
+        // 방의 커스텀 프로퍼티에 플레이어 번호 매핑 저장
+        ExitGames.Client.Photon.Hashtable roomProps = new ExitGames.Client.Photon.Hashtable();
+        Dictionary<string, int> playerNumberMapping = new Dictionary<string, int>();
+        
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            if (player.CustomProperties.ContainsKey("PlayerNumber"))
+            {
+                playerNumberMapping[player.UserId] = (int)player.CustomProperties["PlayerNumber"];
+            }
+        }
+        
+        roomProps["PlayerNumberMapping"] = playerNumberMapping;
+        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProps);
+        
+        Debug.Log("플레이어 번호 할당 완료 및 방에 저장됨");
+    }
+    
+    private System.Collections.IEnumerator WaitForPlayerNumberAssignment()
+    {
+        // 마스터 클라이언트가 번호를 할당할 때까지 대기
+        while (!PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("PlayerNumber"))
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+        
+        int assignedNumber = (int)PhotonNetwork.LocalPlayer.CustomProperties["PlayerNumber"];
+        Debug.Log($"플레이어 번호 할당됨: {assignedNumber}");
+    }
+    
     // 포톤 콜백들
     public override void OnConnectedToMaster()
     {
@@ -83,7 +155,10 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks
         Debug.Log($"방에 참가됨: {PhotonNetwork.CurrentRoom.Name}");
         Debug.Log($"현재 플레이어 수: {PhotonNetwork.CurrentRoom.PlayerCount}/{PhotonNetwork.CurrentRoom.MaxPlayers}");
         
-        // 4명이 모이면 게임 시작
+        // 플레이어 번호 할당 및 방에 저장
+        AssignPlayerNumber();
+        
+        // 2명이 모이면 게임 시작
         if (PhotonNetwork.CurrentRoom.PlayerCount >= maxPlayersPerRoom)
         {
             StartGame();

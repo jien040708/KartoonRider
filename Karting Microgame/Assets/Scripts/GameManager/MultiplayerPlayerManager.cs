@@ -58,6 +58,8 @@ public class MultiplayerPlayerManager : MonoBehaviourPun
     
     void Start()
     {
+        Debug.Log("=== MultiplayerPlayerManager 시작 ===");
+        
         // Inspector에서 연결되지 않은 경우 자동으로 찾기
         if (player1 == null) player1 = GameObject.Find("Player_1");
         if (player2 == null) player2 = GameObject.Find("Player_2");
@@ -72,6 +74,8 @@ public class MultiplayerPlayerManager : MonoBehaviourPun
         
         // 다른 플레이어들 조작 불가능하게 설정
         DisableOtherPlayers();
+        
+        Debug.Log("=== MultiplayerPlayerManager 설정 완료 ===");
     }
     
     void RegisterPlayers()
@@ -92,13 +96,39 @@ public class MultiplayerPlayerManager : MonoBehaviourPun
     
     void SetupCurrentPlayer()
     {
-        // 포톤 플레이어 번호 시스템 사용
-        int playerNumber = PhotonNetwork.LocalPlayer.GetPlayerNumber();
-        Debug.Log($"포톤 플레이어 번호: {playerNumber}");
+        // 할당된 플레이어 번호 사용
+        int playerNumber = GetAssignedPlayerNumber();
+        Debug.Log($"할당된 플레이어 번호: {playerNumber}");
         
         if (players.ContainsKey(playerNumber + 1)) // 0-based를 1-based로 변환
         {
             currentPlayer = players[playerNumber + 1];
+            
+            // 현재 플레이어의 조작 활성화
+            var kart = currentPlayer.GetComponent<ArcadeKart>();
+            if (kart != null)
+            {
+                kart.SetCanMove(true);
+                Debug.Log($"{currentPlayer.name} 조작 활성화됨");
+                
+                // 현재 플레이어의 Input 컴포넌트들 활성화
+                var inputs = currentPlayer.GetComponents<IInput>();
+                foreach (var input in inputs)
+                {
+                    if (input is MonoBehaviour inputMono)
+                    {
+                        inputMono.enabled = true;
+                        Debug.Log($"{currentPlayer.name} Input 컴포넌트 활성화: {input.GetType().Name}");
+                    }
+                }
+                
+                // PhotonView 소유권 확인
+                var photonView = currentPlayer.GetComponent<PhotonView>();
+                if (photonView != null && !photonView.IsMine)
+                {
+                    Debug.LogWarning($"{currentPlayer.name}의 PhotonView가 로컬 플레이어 소유가 아닙니다! 조작이 안 될 수 있습니다.");
+                }
+            }
             
             // 카메라가 현재 플레이어를 따라가도록 설정
             var camera = FindObjectOfType<Cinemachine.CinemachineVirtualCamera>();
@@ -115,9 +145,22 @@ public class MultiplayerPlayerManager : MonoBehaviourPun
         }
     }
     
+    // 할당된 플레이어 번호 가져오기
+    private int GetAssignedPlayerNumber()
+    {
+        if (PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("PlayerNumber"))
+        {
+            return (int)PhotonNetwork.LocalPlayer.CustomProperties["PlayerNumber"];
+        }
+        
+        // 할당되지 않은 경우 기본값 반환
+        Debug.LogWarning("플레이어 번호가 할당되지 않았습니다. 기본값 0을 사용합니다.");
+        return 0;
+    }
+    
     void DisableOtherPlayers()
     {
-        int currentPlayerNumber = PhotonNetwork.LocalPlayer.GetPlayerNumber();
+        int currentPlayerNumber = GetAssignedPlayerNumber();
         
         foreach (var kvp in players)
         {
@@ -126,9 +169,42 @@ public class MultiplayerPlayerManager : MonoBehaviourPun
                 var kart = kvp.Value.GetComponent<ArcadeKart>();
                 if (kart != null)
                 {
-                    kart.SetCanMove(false); // 조작만 비활성화
+                    kart.SetCanMove(false); // 조작 비활성화
+                    
+                    // Input 컴포넌트들 비활성화 (더 확실한 조작 차단)
+                    var inputs = kvp.Value.GetComponents<IInput>();
+                    foreach (var input in inputs)
+                    {
+                        if (input is MonoBehaviour inputMono)
+                        {
+                            inputMono.enabled = false;
+                            Debug.Log($"{kvp.Value.name} Input 컴포넌트 비활성화: {input.GetType().Name}");
+                        }
+                    }
+                    
+                    // 모든 입력 관련 컴포넌트 비활성화
+                    var inputComponents = kvp.Value.GetComponents<MonoBehaviour>();
+                    foreach (var component in inputComponents)
+                    {
+                        if (component.GetType().Name.Contains("Input") || 
+                            component.GetType().Name.Contains("Controller") ||
+                            component.GetType().Name.Contains("Keyboard") ||
+                            component.GetType().Name.Contains("Gamepad"))
+                        {
+                            component.enabled = false;
+                            Debug.Log($"{kvp.Value.name} 입력 관련 컴포넌트 비활성화: {component.GetType().Name}");
+                        }
+                    }
+                    
+                    // PhotonView 소유권 확인 (다른 플레이어의 카트는 로컬 플레이어가 소유하지 않음)
+                    var photonView = kvp.Value.GetComponent<PhotonView>();
+                    if (photonView != null && photonView.IsMine)
+                    {
+                        Debug.LogWarning($"{kvp.Value.name}의 PhotonView가 로컬 플레이어 소유입니다! 이는 문제가 될 수 있습니다.");
+                    }
+                    
                     // ArcadeKart 컴포넌트는 활성화 유지 (포톤 동기화를 위해)
-                    Debug.Log($"{kvp.Value.name} 조작 비활성화 (동기화는 유지)");
+                    Debug.Log($"{kvp.Value.name} 조작 비활성화 완료 (동기화는 유지)");
                 }
                 else
                 {
