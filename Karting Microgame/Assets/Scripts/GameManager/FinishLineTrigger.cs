@@ -12,12 +12,8 @@ public class FinishLineTrigger : MonoBehaviour
             hasFinished = true;
             
             // 멀티플레이어 결승선 통과 메시지 전송
-            var roomWebSocketObj = GameObject.Find("RoomWebSocketManager");
-            if (roomWebSocketObj != null)
-            {
-                roomWebSocketObj.SendMessage("SendMessage", "__PLAYER_FINISH__:1");
-                Debug.Log("🏆 플레이어가 결승선을 통과했습니다!");
-            }
+            PhotonRoomManager.Instance.SendPlayerFinished();
+            Debug.Log("🏆 플레이어가 결승선을 통과했습니다!");
         }
     }
 } 

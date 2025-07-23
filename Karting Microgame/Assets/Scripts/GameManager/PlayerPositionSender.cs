@@ -32,12 +32,7 @@ public class PlayerPositionSender : MonoBehaviour
     
     void SendPosition(Vector3 position, Quaternion rotation)
     {
-        var roomWebSocketObj = GameObject.Find("RoomWebSocketManager");
-        if (roomWebSocketObj != null)
-        {
-            string message = $"__PLAYER_POSITION__:{playerId}:{position.x:F2},{position.y:F2},{position.z:F2}:{rotation.x:F2},{rotation.y:F2},{rotation.z:F2},{rotation.w:F2}";
-            roomWebSocketObj.SendMessage("SendMessage", message);
-            Debug.Log($"위치 전송: {message}");
-        }
+        PhotonRoomManager.Instance.SendPlayerPosition(position, rotation);
+        Debug.Log($"위치 전송: 플레이어 {playerId} - {position}, {rotation}");
     }
 } 
