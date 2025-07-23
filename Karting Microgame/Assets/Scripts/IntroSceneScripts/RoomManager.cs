@@ -72,6 +72,11 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     public void OnClickCreateRoom()
     {
+        if (!PhotonInitializer.Instance.IsReady)
+    {
+        Debug.LogWarning("❌ Photon 서버가 아직 준비되지 않았습니다!");
+        return;
+    }
         string roomCode = Guid.NewGuid().ToString("N").Substring(0, 6);
         StartCoroutine(CreateRoomRequest(roomCode));
         Player.SetActive(false);
@@ -131,10 +136,16 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     IEnumerator CreateRoomRequest(string roomUUID)
     {
+    //     if (!PhotonInitializer.Instance.IsReady)
+    // {
+    //     Debug.LogWarning("❌ Photon 서버가 아직 준비되지 않았습니다!");
+    //     return;
+    // }
         RoomOptions options = new RoomOptions();
         options.MaxPlayers = 4; // 원하는 최대 인원
 
         PhotonNetwork.CreateRoom(roomUUID, options);
+        roomCodeText.text = roomUUID;
 
         //방 생성 실패 로직
         // Player.SetActive(false);
