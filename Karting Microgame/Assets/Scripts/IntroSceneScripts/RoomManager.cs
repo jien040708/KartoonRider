@@ -78,7 +78,7 @@ public class RoomManager : MonoBehaviour
 
     IEnumerator CreateRoomRequest()
     {
-        int host_id = UserManager.Instance.UserId;
+        int host_id = UserManager.Instance.UserId; //문제점
         string url = $"https://kartoonrider-production-b878.up.railway.app/rooms/create/{host_id}";
 
         // body: {"name": "MyRoom"}

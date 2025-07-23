@@ -5,6 +5,7 @@ from dependencies.redis_client import redis
 from models.user import User
 from pydantic import BaseModel
 from services.room_service import *
+from routers.websocket_router import broadcast_message
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
@@ -43,5 +44,9 @@ async def delete_room(code:str):
     deleted = await delete_room_in_redis(code)
     if not deleted:
         raise HTTPException(status_code=404, detail="삭제할 방이 없습니다.")
+    
+    
+    await broadcast_message(code, "__ROOM_DELETED__")  # <- 추가
+
     
     return {"deleted":True}

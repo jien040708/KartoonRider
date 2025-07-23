@@ -28,6 +28,10 @@ async def websocket_endpoint(websocket: WebSocket, room_code: str, user_id: str)
     active_connections[room_code][user_id] = websocket
 
     try:
+        # 플레이어 ID 할당 (방에 입장한 순서대로 1, 2, 3, 4)
+        player_id = len(active_connections[room_code])
+        await websocket.send_text(f"__PLAYER_ID__:{player_id}")
+        
         # 입장 메시지 전송
         await broadcast_message(
             room_code,

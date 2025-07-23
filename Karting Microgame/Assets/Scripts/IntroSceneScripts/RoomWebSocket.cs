@@ -1,5 +1,7 @@
 using NativeWebSocket;
 using UnityEngine;
+using System.Collections;
+
 
 public class RoomWebSocket : MonoBehaviour
 {
@@ -27,7 +29,40 @@ public class RoomWebSocket : MonoBehaviour
         {
             string msg = System.Text.Encoding.UTF8.GetString(bytes);
             Debug.Log("수신 메시지: " + msg);
+
+            if (msg == "__ROOM_DELETED__")
+            {
+                Debug.LogWarning("⚠️ 방이 삭제되어 연결을 종료합니다.");
+                StartCoroutine(HandleRoomDeletedUI());
+                _ = websocket.Close();
+                return;
+            }
+
+
+
+            // "현재 인원: " 뒤의 숫자 추출
+            string marker = "현재 인원: ";
+            int index = msg.IndexOf(marker);
+            if (index != -1)
+            {
+                string countStr = msg.Substring(index + marker.Length).Trim();
+                if (int.TryParse(countStr, out int count))
+                {
+                    RoomStatusUI ui = FindObjectOfType<RoomStatusUI>();
+                    if (ui != null)
+                    {   
+                        Debug.Log($"📊 UI 찾음. 현재 인원: {count}");
+                        ui.SetCurrentPlayers(count);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("❌ RoomStatusUI 못 찾음");
+                    }
+                }
+            }
         };
+
+
 
         websocket.OnClose += (e) =>
         {
@@ -50,11 +85,24 @@ public class RoomWebSocket : MonoBehaviour
         }
     }
 
+    private IEnumerator HandleRoomDeletedUI()
+    {
+        yield return null; // 다음 프레임까지 대기 (UI 접근 안전하게)
+
+        RoomStatusUI ui = FindObjectOfType<RoomStatusUI>();
+        if (ui != null)
+        {
+            ui.beforeJoinPanel.SetActive(true);
+            ui.afterJoinPanel.SetActive(false);
+        }
+    }
+
+
     private void Update()
     {
-#if !UNITY_WEBGL || UNITY_EDITOR
-        websocket?.DispatchMessageQueue();
-#endif
+        #if !UNITY_WEBGL || UNITY_EDITOR
+                websocket?.DispatchMessageQueue();
+        #endif
     }
 
     private async void OnApplicationQuit()
@@ -65,3 +113,5 @@ public class RoomWebSocket : MonoBehaviour
         }
     }
 }
+
+
