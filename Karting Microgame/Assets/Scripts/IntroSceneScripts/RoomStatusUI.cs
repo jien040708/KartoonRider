@@ -16,7 +16,7 @@ public class RoomStatusUI : MonoBehaviour
     public Button leaveRoomButton;
     public Button deleteRoomButton;
     
-    public int totalPlayers = 4; // 실제 방 최대 플레이어 수 로직
+    public int totalPlayers = 2; // 테스트용으로 2명으로 변경
     public int currentPlayers = 0; // 실제 방 참가 플레이어 수 로직
     public string roomCode;
 

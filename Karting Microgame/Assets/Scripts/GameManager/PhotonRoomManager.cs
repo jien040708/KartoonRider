@@ -9,7 +9,7 @@ public class PhotonRoomManager : MonoBehaviourPunCallbacks
     
     [Header("포톤 설정")]
     public string gameVersion = "1.0";
-    public int maxPlayersPerRoom = 4;
+    public int maxPlayersPerRoom = 2; // 테스트용으로 2명으로 변경
     
     private void Awake()
     {

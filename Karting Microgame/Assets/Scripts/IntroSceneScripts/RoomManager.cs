@@ -142,7 +142,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
     //     return;
     // }
         RoomOptions options = new RoomOptions();
-        options.MaxPlayers = 4; // 원하는 최대 인원
+        options.MaxPlayers = 2; // 테스트용으로 2명으로 변경
 
         PhotonNetwork.CreateRoom(roomUUID, options);
         roomCodeText.text = roomUUID;
