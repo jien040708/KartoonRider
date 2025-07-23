@@ -11,7 +11,6 @@ public class RoomManager : MonoBehaviour
     public RoomStatusUI roomStatusUI;
     public GameObject afterJoinPanel; // 방 참가 후 UI 패널
     public GameObject beforeJoinPanel; // 방 참가 전 UI 패널
-
     public GameObject Player;
     public GameObject popupCreateResult;
     public TMP_Text roomCodeText;

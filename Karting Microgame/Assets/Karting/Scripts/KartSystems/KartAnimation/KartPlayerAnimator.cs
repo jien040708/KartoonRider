@@ -5,7 +5,13 @@ namespace KartGame.KartSystems
 {
     public class KartPlayerAnimator : MonoBehaviour
     {
+        public Transform KartClassicPlayer;
         public Animator PlayerAnimator;
+
+        public void SetAnimator(Animator animator)
+        {
+            PlayerAnimator = animator;
+        }
         public ArcadeKart Kart;
 
         public string SteeringParam = "Steering";

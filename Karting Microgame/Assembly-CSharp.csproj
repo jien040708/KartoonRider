@@ -51,7 +51,6 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
-    <Compile Include="Assets\Scripts\MainSceneScripts\MultiplayScript\RemotePlayercontroller.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\IntroSceneScripts\UserNicknameDisplay.cs" />
     <Compile Include="Assets\Scripts\IntroSceneScripts\CoinDisplay.cs" />
@@ -85,7 +84,6 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\ModAssets\Scripts\Kart\EmitParticlesOnKartBounce.cs" />
-    <Compile Include="Assets\Scripts\MainSceneScripts\MultiplayScript\NetworkManager.cs" />
     <Compile Include="Assets\ModAssets\Scripts\Backend\TemplateEditorDetection.cs" />
     <Compile Include="Assets\ModAssets\Scripts\Kart\Jiggler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />

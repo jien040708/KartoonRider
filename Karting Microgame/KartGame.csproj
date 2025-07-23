@@ -65,7 +65,9 @@
     <Compile Include="Assets\Karting\Scripts\UI\InGameInfo.cs" />
     <Compile Include="Assets\Karting\Scripts\UI\UITable.cs" />
     <Compile Include="Assets\Karting\Scripts\KartSystems\KartAudio\EngineAudio.cs" />
+    <Compile Include="Assets\Karting\Scripts\KartSystems\KartAnimation\IntroSceneScript.cs" />
     <Compile Include="Assets\Karting\Scripts\UI\DisplayMessage.cs" />
+    <Compile Include="Assets\Karting\Scripts\KartSystems\KartAnimation\SkinPreviewUpdater.cs" />
     <Compile Include="Assets\Karting\Scripts\GameFlowManager.cs" />
     <Compile Include="Assets\Karting\Scripts\GameModes\LapObject.cs" />
     <Compile Include="Assets\Karting\Scripts\FramerateCounter.cs" />
@@ -90,6 +92,7 @@
     <Compile Include="Assets\Karting\Scripts\Utilities\AudioUtility.cs" />
     <Compile Include="Assets\Karting\Scripts\GameModes\ObjectiveCompleteLaps.cs" />
     <Compile Include="Assets\Karting\Scripts\UI\NotificationHUDManager.cs" />
+    <Compile Include="Assets\Karting\Scripts\KartSystems\KartAnimation\SkinManager.cs" />
     <Compile Include="Assets\Karting\Scripts\KartSystems\KartAudio\ArcadeEngineAudio.cs" />
     <Compile Include="Assets\Karting\Scripts\Utilities\RotateOnAxis.cs" />
     <Compile Include="Assets\Karting\Scripts\Utilities\QuaternionExtensions.cs" />
@@ -106,6 +109,7 @@
     <Compile Include="Assets\Karting\Scripts\Utilities\MeshCombineUtility.cs" />
     <Compile Include="Assets\Karting\Scripts\Track\TimeDisplay.cs" />
     <Compile Include="Assets\Karting\Scripts\Utilities\FPSCounter.cs" />
+    <Compile Include="Assets\Karting\Scripts\KartSystems\KartAnimation\MainSceneScript.cs" />
     <Compile Include="Assets\Karting\Scripts\Utilities\RequireInterfaceAttribute.cs" />
     <Compile Include="Assets\Karting\Scripts\UI\NotificationToast.cs" />
     <Compile Include="Assets\Karting\Scripts\Utilities\BuildSettings.cs" />
