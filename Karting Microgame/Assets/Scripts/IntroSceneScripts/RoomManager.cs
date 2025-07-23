@@ -5,8 +5,10 @@ using UnityEngine.Networking;
 using System.Collections;
 using UnityEngine.Analytics;
 using System;
+using Photon.Pun;
+using Photon.Realtime;
 
-public class RoomManager : MonoBehaviour
+public class RoomManager : MonoBehaviourPunCallbacks
 {
     public RoomStatusUI roomStatusUI;
     public GameObject afterJoinPanel; // 방 참가 후 UI 패널
@@ -26,10 +28,56 @@ public class RoomManager : MonoBehaviour
     public GameObject popupBackgroundOverlay;
 
     string inputCode;
+    public override void OnJoinedRoom()
+    {
+        Debug.Log("✅ 방 참가 성공!");
+        // 여기에 성공했을 때 UI 띄우거나 게임 시작하면 됨
+        if(popupJoinFailedWarn.activeSelf)
+        {
+            popupJoinFailedWarn.SetActive(false);
+        }
+        roomStatusUI.ShowAfterJoinPanel();
+        
+        // PhotonRoomManager에 방 참가 알림
+        if (PhotonRoomManager.Instance != null)
+        {
+            Debug.Log("PhotonRoomManager에 방 참가 알림");
+        }
+    }
+
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        Debug.LogError("❌ 방 참가 실패: " + message);
+        popupJoinFailedWarn.SetActive(true);
+        // 여기서 실패 UI 띄우면 됨
+    }
+
+    public override void OnCreateRoomFailed(short returnCode, string message)
+    {
+        Debug.LogError($"❌ 방 생성 실패! 이유: {message} (코드: {returnCode})");
+        createFailedButton.gameObject.SetActive(true); 
+    }
+    
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        Debug.Log($"새 플레이어 입장: {newPlayer.NickName}");
+        roomStatusUI.UpdatePlayerCount();
+    }
+    
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        Debug.Log($"플레이어 퇴장: {otherPlayer.NickName}");
+        roomStatusUI.UpdatePlayerCount();
+    }
 
     public void OnClickCreateRoom()
     {
-        StartCoroutine(CreateRoomRequest());
+        string roomCode = Guid.NewGuid().ToString("N").Substring(0, 6);
+        StartCoroutine(CreateRoomRequest(roomCode));
+        Player.SetActive(false);
+        popupCreateResult.SetActive(true);
+        popupBackgroundOverlay.SetActive(true);
+
          // 플레이어 오브젝트 비활성화
     }
 
@@ -43,8 +91,7 @@ public class RoomManager : MonoBehaviour
 
     public void OnClickCreateFailed()
     {
-        createFailedButton.gameObject.SetActive(false);
-        Player.SetActive(true); // 플레이어 오브젝트 활성화
+        createFailedButton.gameObject.SetActive(true);
     }
 
     public void OnClickJoinRoom()
@@ -63,6 +110,12 @@ public class RoomManager : MonoBehaviour
     public void OnClickJoinConfirm()
     {
         StartCoroutine(JoinRoomRequest(inputCode));
+        popupJoinInput.SetActive(false);
+        popupBackgroundOverlay.SetActive(false);
+        Player.SetActive(true);
+
+        roomStatusUI.SetRoomCode(inputCode); //복귀2
+        roomStatusUI.ShowAfterJoinPanel();
     }
 
     public void OnClickJoinCancel()
@@ -76,43 +129,18 @@ public class RoomManager : MonoBehaviour
         Player.SetActive(true); // 플레이어 오브젝트 활성화
     }
 
-    IEnumerator CreateRoomRequest()
+    IEnumerator CreateRoomRequest(string roomUUID)
     {
-        int host_id = UserManager.Instance.UserId; //문제점
-        string url = $"https://kartoonrider-production-b878.up.railway.app/rooms/create/{host_id}";
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = 4; // 원하는 최대 인원
 
-        // body: {"name": "MyRoom"}
-        string json = "{\"name\":\"MyRoom\"}";
+        PhotonNetwork.CreateRoom(roomUUID, options);
 
-        UnityWebRequest req = new UnityWebRequest(url, "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        req.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        req.downloadHandler = new DownloadHandlerBuffer();
-        req.SetRequestHeader("Content-Type", "application/json");
-
-        yield return req.SendWebRequest();
-
-        if (req.result == UnityWebRequest.Result.Success)
-        {
-            string result = req.downloadHandler.text;
-            RoomCodeResponse data = JsonUtility.FromJson<RoomCodeResponse>(result);
-            roomCodeText.text = data.room_code;
-            roomStatusUI.SetRoomCode(data.room_code);
-
-            Debug.Log(data.room_code);
-            Debug.Log(host_id.ToString());
-            RoomWebSocket.Instance.Connect(data.room_code, host_id.ToString());
-
-            Player.SetActive(false);
-            popupCreateResult.SetActive(true);
-            popupBackgroundOverlay.SetActive(true);
-        }
-        else
-        {   
-            Debug.LogError("방 생성 실패: " + req.responseCode + " / " + req.error);
-            Player.SetActive(false);
-            createFailedButton.gameObject.SetActive(true);
-        }
+        //방 생성 실패 로직
+        // Player.SetActive(false);
+        // createFailedButton.gameObject.SetActive(true);
+        
+        yield return null; // 코루틴이 제대로 작동하도록 yield return 추가
     }
 
     [System.Serializable]
@@ -123,42 +151,10 @@ public class RoomManager : MonoBehaviour
 
 
 
-    IEnumerator JoinRoomRequest(string code)
+    IEnumerator JoinRoomRequest(string roomUUID)
     {
-        int userId = UserManager.Instance.UserId;
-        string url = $"https://kartoonrider-production-b878.up.railway.app/rooms/join/{code}";
-
-        // body: {"user_id": 1}
-        string json = $"{{\"user_id\":{userId}}}";
-
-        UnityWebRequest req = new UnityWebRequest(url, "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        req.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        req.downloadHandler = new DownloadHandlerBuffer();
-        req.SetRequestHeader("Content-Type", "application/json");
-
-        yield return req.SendWebRequest();
-
-        if (req.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log("참가 성공");
-            roomStatusUI.SetRoomCode(code);
-
-            popupJoinInput.SetActive(false);
-            popupBackgroundOverlay.SetActive(false);
-            Player.SetActive(true);
-
-            roomStatusUI.SetRoomCode(code); //복귀2
-            roomStatusUI.ShowAfterJoinPanel();
-            Debug.Log(userId.ToString());
-            Debug.Log(code);
-            RoomWebSocket.Instance.Connect(code, userId.ToString());
-        }
-        else
-        {
-            Debug.LogError("참가 실패: " + req.responseCode + " / " + req.error);
-            popupJoinFailedWarn.SetActive(true);
-        }
+        PhotonNetwork.JoinRoom(roomUUID);
+        yield return null; // 코루틴이 제대로 작동하도록 yield return 추가
     }
 
 

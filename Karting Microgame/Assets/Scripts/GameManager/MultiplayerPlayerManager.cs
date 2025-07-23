@@ -1,8 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 using KartGame.KartSystems;
+using Photon.Pun;
+using Photon.Realtime;
+using Photon.Pun.UtilityScripts;
 
-public class MultiplayerPlayerManager : MonoBehaviour
+public class MultiplayerPlayerManager : MonoBehaviourPun
 {
     [Header("플레이어 설정")]
     public GameObject player1; // Player_1
@@ -11,10 +14,47 @@ public class MultiplayerPlayerManager : MonoBehaviour
     public GameObject player4; // Player_4
     
     [Header("플레이어 정보")]
-    public int currentPlayerId = 1; // 현재 플레이어 ID (기본값)
-    
     private Dictionary<int, GameObject> players = new Dictionary<int, GameObject>();
     private GameObject currentPlayer;
+    private int currentPlayerId = -1;
+    
+    // 플레이어 번호 할당을 위한 룸 프로퍼티 키
+    private const string PLAYER_NUMBERS_KEY = "PlayerNumbers";
+    
+    void Awake()
+    {
+        // PhotonView가 없으면 자동으로 추가
+        if (GetComponent<PhotonView>() == null)
+        {
+            PhotonView photonView = gameObject.AddComponent<PhotonView>();
+            photonView.ViewID = 998; // 고유한 ViewID 설정
+            Debug.Log("MultiplayerPlayerManager에 PhotonView 추가됨");
+        }
+        
+        // 포톤 콜백 구독
+        if (photonView != null)
+        {
+            photonView.ObservedComponents.Add(this);
+        }
+        
+        // PlayerNumbering 이벤트 구독
+        PlayerNumbering.OnPlayerNumberingChanged += OnPlayerNumberingChanged;
+    }
+    
+    void OnDestroy()
+    {
+        // PlayerNumbering 이벤트 구독 해제
+        PlayerNumbering.OnPlayerNumberingChanged -= OnPlayerNumberingChanged;
+    }
+    
+    // 플레이어 번호가 변경될 때 호출되는 콜백
+    public void OnPlayerNumberingChanged()
+    {
+        Debug.Log("플레이어 번호가 변경되었습니다!");
+        // 현재 플레이어 설정 다시 적용
+        SetupCurrentPlayer();
+        DisableOtherPlayers();
+    }
     
     void Start()
     {
@@ -52,10 +92,13 @@ public class MultiplayerPlayerManager : MonoBehaviour
     
     void SetupCurrentPlayer()
     {
-        // 서버에서 할당된 플레이어 ID에 따라 현재 플레이어 설정
-        if (players.ContainsKey(currentPlayerId))
+        // 포톤 플레이어 번호 시스템 사용
+        int playerNumber = PhotonNetwork.LocalPlayer.GetPlayerNumber();
+        Debug.Log($"포톤 플레이어 번호: {playerNumber}");
+        
+        if (players.ContainsKey(playerNumber + 1)) // 0-based를 1-based로 변환
         {
-            currentPlayer = players[currentPlayerId];
+            currentPlayer = players[playerNumber + 1];
             
             // 카메라가 현재 플레이어를 따라가도록 설정
             var camera = FindObjectOfType<Cinemachine.CinemachineVirtualCamera>();
@@ -63,32 +106,41 @@ public class MultiplayerPlayerManager : MonoBehaviour
             {
                 camera.Follow = currentPlayer.transform;
                 camera.LookAt = currentPlayer.transform;
-                Debug.Log($"카메라가 {currentPlayer.name} (플레이어 {currentPlayerId})을 따라갑니다");
+                Debug.Log($"카메라가 {currentPlayer.name} (플레이어 {playerNumber + 1})을 따라갑니다");
             }
         }
         else
         {
-            Debug.LogWarning($"플레이어 ID {currentPlayerId}에 해당하는 플레이어가 없습니다!");
+            Debug.LogWarning($"플레이어 번호 {playerNumber + 1}에 해당하는 플레이어가 없습니다!");
         }
     }
     
     void DisableOtherPlayers()
     {
+        int currentPlayerNumber = PhotonNetwork.LocalPlayer.GetPlayerNumber();
+        
         foreach (var kvp in players)
         {
-            if (kvp.Key != currentPlayerId && kvp.Value != null)
+            if (kvp.Key != (currentPlayerNumber + 1) && kvp.Value != null) // 0-based를 1-based로 변환
             {
                 var kart = kvp.Value.GetComponent<ArcadeKart>();
                 if (kart != null)
                 {
-                    kart.SetCanMove(false);
-                    // ArcadeKart 컴포넌트 자체를 비활성화
-                    kart.enabled = false;
-                    Debug.Log($"{kvp.Value.name} 조작 비활성화");
+                    kart.SetCanMove(false); // 조작만 비활성화
+                    // ArcadeKart 컴포넌트는 활성화 유지 (포톤 동기화를 위해)
+                    Debug.Log($"{kvp.Value.name} 조작 비활성화 (동기화는 유지)");
                 }
                 else
                 {
                     Debug.LogError($"{kvp.Value.name}에 ArcadeKart 컴포넌트가 없습니다!");
+                }
+                
+                // KartPlayerAnimator는 비활성화 (에러 방지)
+                var animator = kvp.Value.GetComponent<KartGame.KartSystems.KartPlayerAnimator>();
+                if (animator != null)
+                {
+                    animator.enabled = false;
+                    Debug.Log($"{kvp.Value.name} 애니메이터 비활성화");
                 }
             }
             else if (kvp.Value == null)
@@ -98,14 +150,11 @@ public class MultiplayerPlayerManager : MonoBehaviour
         }
     }
     
-    // 다른 플레이어의 위치 업데이트 (웹소켓에서 받은 정보로)
+    // 다른 플레이어의 위치 업데이트 (포톤 자동 동기화로 처리됨)
     public void UpdatePlayerPosition(int playerId, Vector3 position, Quaternion rotation)
     {
-        if (players.ContainsKey(playerId) && playerId != currentPlayerId)
-        {
-            players[playerId].transform.position = position;
-            players[playerId].transform.rotation = rotation;
-        }
+        // PhotonTransformView가 자동으로 처리하므로 별도 로직 불필요
+        Debug.Log($"플레이어 {playerId} 위치 업데이트 (포톤 자동 동기화)");
     }
     
     // 플레이어 ID 설정
@@ -119,19 +168,11 @@ public class MultiplayerPlayerManager : MonoBehaviour
         DisableOtherPlayers();
     }
     
-    // 현재 플레이어의 위치를 웹소켓으로 전송
+    // 현재 플레이어의 위치를 포톤으로 전송 (PhotonTransformView가 자동으로 처리)
     public void SendCurrentPlayerPosition()
     {
-        if (currentPlayer != null)
-        {
-            var roomWebSocketObj = GameObject.Find("RoomWebSocketManager");
-            if (roomWebSocketObj != null)
-            {
-                Vector3 position = currentPlayer.transform.position;
-                Quaternion rotation = currentPlayer.transform.rotation;
-                string message = $"__PLAYER_POSITION__:{currentPlayerId}:{position.x:F2},{position.y:F2},{position.z:F2}:{rotation.x:F2},{rotation.y:F2},{rotation.z:F2},{rotation.w:F2}";
-                roomWebSocketObj.SendMessage("SendMessage", message);
-            }
-        }
+        // PhotonTransformView가 자동으로 위치 동기화를 처리하므로 
+        // 별도의 전송 로직이 필요하지 않습니다.
+        Debug.Log("포톤 자동 위치 동기화 사용 중");
     }
 } 

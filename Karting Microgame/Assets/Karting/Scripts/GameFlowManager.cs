@@ -4,6 +4,8 @@ using UnityEngine.Playables;
 using KartGame.KartSystems;
 using UnityEngine.SceneManagement;
 using System;
+using Photon.Pun;
+using Photon.Realtime;
 
 public enum GameState{Play, Won, Lost}
 
@@ -156,12 +158,25 @@ public class GameFlowManager : MonoBehaviour
 
         m_TimeManager.StopRace();
 
-        // 멀티플레이어 게임 종료 메시지 전송
-        var roomWebSocketObj = GameObject.Find("RoomWebSocketManager");
-        if (roomWebSocketObj != null)
+        // 멀티플레이어 게임 종료 메시지 전송 (포톤)
+        // PhotonRoomManager는 다른 어셈블리에 있어서 직접 접근할 수 없음
+        // 대신 리플렉션을 사용하여 안전하게 접근
+        try
         {
-            roomWebSocketObj.SendMessage("SendMessage", "__GAME_END__");
-            Debug.Log("🏁 __GAME_END__ 메시지 전송됨");
+            var photonRoomManager = FindObjectOfType<MonoBehaviourPunCallbacks>();
+            if (photonRoomManager != null && photonRoomManager.GetType().Name == "PhotonRoomManager")
+            {
+                var sendGameEndMethod = photonRoomManager.GetType().GetMethod("SendGameEnd");
+                if (sendGameEndMethod != null)
+                {
+                    sendGameEndMethod.Invoke(photonRoomManager, null);
+                    Debug.Log("🏁 게임 종료 메시지 전송됨 (포톤)");
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"PhotonRoomManager 접근 중 오류: {e.Message}");
         }
 
         // Remember that we need to load the appropriate end scene after a delay

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Photon.Pun;
 
 public class FinishLineTrigger : MonoBehaviour
 {
@@ -11,16 +12,18 @@ public class FinishLineTrigger : MonoBehaviour
         {
             hasFinished = true;
             
-            // 멀티플레이어 결승선 통과 메시지 전송
-            if (RoomWebSocket.Instance != null)
+            // 포톤 RPC로 결승선 통과 메시지 전송
+            if (PhotonRoomManager.Instance != null)
             {
-                var playerManager = FindObjectOfType<MultiplayerPlayerManager>();
-                if (playerManager != null)
-                {
-                    RoomWebSocket.Instance.SendMessage("__PLAYER_FINISH__:" + playerManager.currentPlayerId);
-                }
+                PhotonRoomManager.Instance.SendPlayerFinished();
+            }
+            else
+            {
+                Debug.LogWarning("PhotonRoomManager.Instance가 null입니다!");
             }
             Debug.Log("🏆 플레이어가 결승선을 통과했습니다!");
         }
     }
+    
+
 } 
