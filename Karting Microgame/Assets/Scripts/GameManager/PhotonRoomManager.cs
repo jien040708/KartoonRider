@@ -2,6 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class PhotonRoomManager : MonoBehaviourPunCallbacks
 {
